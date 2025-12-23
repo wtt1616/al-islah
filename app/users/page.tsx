@@ -435,10 +435,20 @@ export default function UsersPage() {
                         }
                         required
                       >
-                        <option value="admin">Admin</option>
-                        <option value="head_imam">Head Imam</option>
-                        <option value="imam">Imam</option>
-                        <option value="bilal">Bilal</option>
+                        <optgroup label="Pengguna Dalaman">
+                          <option value="admin">Admin</option>
+                          <option value="bendahari">Bendahari</option>
+                          <option value="aset">Pegawai Aset</option>
+                          <option value="pegawai">Pegawai</option>
+                        </optgroup>
+                        <optgroup label="Petugas">
+                          <option value="head_imam">Ketua Imam</option>
+                          <option value="imam">Imam</option>
+                          <option value="bilal">Bilal</option>
+                          <option value="imam_jumaat">Imam Jumaat</option>
+                          <option value="bilal_jumaat">Bilal Jumaat</option>
+                          <option value="penceramah">Penceramah</option>
+                        </optgroup>
                       </select>
                     </div>
                     <div className="mb-3">
