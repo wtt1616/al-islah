@@ -105,7 +105,7 @@ export default function Komuniti2UPage() {
                 <i className="bi bi-shop me-2"></i>
                 Komuniti 2U
               </h2>
-              <p className="mb-0 opacity-75">Marketplace Komuniti Surau Ar-Raudhah</p>
+              <p className="mb-0 opacity-75">Marketplace Komuniti Surau Al-Islah</p>
             </div>
             <div className="d-flex gap-2">
               <Link href="/komuniti2u/seller" className="btn btn-light">

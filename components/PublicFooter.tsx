@@ -8,7 +8,7 @@ export default function PublicFooter() {
           <div className="col-md-6 text-center text-md-start mb-2 mb-md-0">
             <small className="text-muted">
               <i className="bi bi-mosque me-1"></i>
-              Sistem iSAR - Surau Ar-Raudhah
+              Sistem iSAR - Surau Al-Islah
             </small>
           </div>
           <div className="col-md-6 text-center text-md-end">

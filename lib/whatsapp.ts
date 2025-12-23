@@ -417,7 +417,7 @@ export async function sendPermohonanMajlisConfirmation(data: PermohonanMajlisDat
 
 Yth. *${data.nama_pemohon}*,
 
-Permohonan anda untuk mengadakan majlis di Surau Ar-Raudhah telah *BERJAYA DITERIMA* dan sedang diproses.
+Permohonan anda untuk mengadakan majlis di Surau Al-Islah telah *BERJAYA DITERIMA* dan sedang diproses.
 
 ━━━━━━━━━━━━━━━━━━
 📋 *SALINAN PERMOHONAN*
@@ -444,7 +444,7 @@ ${peralatanList || 'Tiada'}${data.peralatan_lain ? `\n• Lain-lain: ${data.pera
 
 ━━━━━━━━━━━━━━━━━━
 
-Pihak pengurusan Surau Ar-Raudhah akan menghubungi anda melalui WhatsApp untuk memaklumkan status kelulusan permohonan.
+Pihak pengurusan Surau Al-Islah akan menghubungi anda melalui WhatsApp untuk memaklumkan status kelulusan permohonan.
 
 📞 *Sebarang pertanyaan:*
 • Pengerusi: 013-645 3396
@@ -452,7 +452,7 @@ Pihak pengurusan Surau Ar-Raudhah akan menghubungi anda melalui WhatsApp untuk m
 • Siak: 012-974 3858
 
 جزاك الله خيرا
-_Sistem iSAR - Surau Ar-Raudhah_`;
+_Sistem iSAR - Surau Al-Islah_`;
 
   const result = await sendTwilioMessage(phoneNumber, message);
 
@@ -494,7 +494,7 @@ export async function sendPermohonanStatusUpdate(
 
 Yth. *${data.nama_pemohon}*,
 
-Alhamdulillah, permohonan anda untuk mengadakan majlis di Surau Ar-Raudhah telah *DILULUSKAN* ✅
+Alhamdulillah, permohonan anda untuk mengadakan majlis di Surau Al-Islah telah *DILULUSKAN* ✅
 
 ━━━━━━━━━━━━━━━━━━
 📋 *BUTIRAN MAJLIS*
@@ -520,7 +520,7 @@ Alhamdulillah, permohonan anda untuk mengadakan majlis di Surau Ar-Raudhah telah
 Terima kasih atas kerjasama anda.
 
 جزاك الله خيرا
-_Sistem iSAR - Surau Ar-Raudhah_`;
+_Sistem iSAR - Surau Al-Islah_`;
   } else {
     message = `🕌 *SURAU AR-RAUDHAH*
 *Permohonan Majlis TIDAK DILULUSKAN*
@@ -529,7 +529,7 @@ _Sistem iSAR - Surau Ar-Raudhah_`;
 
 Yth. *${data.nama_pemohon}*,
 
-Dengan hormatnya dimaklumkan bahawa permohonan anda untuk mengadakan majlis di Surau Ar-Raudhah *TIDAK DAPAT DILULUSKAN* ❌
+Dengan hormatnya dimaklumkan bahawa permohonan anda untuk mengadakan majlis di Surau Al-Islah *TIDAK DAPAT DILULUSKAN* ❌
 
 ━━━━━━━━━━━━━━━━━━
 
@@ -551,7 +551,7 @@ Anda boleh menghubungi pihak pengurusan untuk maklumat lanjut atau membuat permo
 Mohon maaf atas sebarang kesulitan.
 
 جزاك الله خيرا
-_Sistem iSAR - Surau Ar-Raudhah_`;
+_Sistem iSAR - Surau Al-Islah_`;
   }
 
   const result = await sendTwilioMessage(phoneNumber, message);
@@ -586,7 +586,7 @@ export async function sendFeedbackReplyWhatsApp(
 
 Yth. *${nama}*,
 
-Berikut adalah jawapan daripada pihak pengurusan Surau Ar-Raudhah:
+Berikut adalah jawapan daripada pihak pengurusan Surau Al-Islah:
 
 ━━━━━━━━━━━━━━━━━━
 📝 *Maklum Balas Asal:*
@@ -600,7 +600,7 @@ ${adminReply}
 Sekiranya anda mempunyai sebarang pertanyaan lanjut, sila hantar maklum balas baru.
 
 جزاك الله خيرا
-_Sistem iSAR - Surau Ar-Raudhah_`;
+_Sistem iSAR - Surau Al-Islah_`;
 
   const result = await sendTwilioMessage(phoneNumber, message);
 
@@ -633,7 +633,7 @@ export async function sendFeedbackConfirmationWhatsApp(
 
 Yth. *${nama}*,
 
-Terima kasih kerana menghantar maklum balas kepada Surau Ar-Raudhah.
+Terima kasih kerana menghantar maklum balas kepada Surau Al-Islah.
 
 ━━━━━━━━━━━━━━━━━━
 📝 *Maklum Balas Anda:*
@@ -643,7 +643,7 @@ ${truncatedMessage}
 Maklum balas anda telah diterima dan sedang diproses. Pihak pengurusan akan menghubungi anda melalui WhatsApp atau emel sekiranya terdapat sebarang maklum balas.
 
 جزاك الله خيرا
-_Sistem iSAR - Surau Ar-Raudhah_`;
+_Sistem iSAR - Surau Al-Islah_`;
 
   const result = await sendTwilioMessage(phoneNumber, message);
 

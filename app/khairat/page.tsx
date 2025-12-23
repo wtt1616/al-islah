@@ -264,7 +264,7 @@ export default function KhairatPublicPage() {
               <i className="bi bi-people-fill text-success" style={{ fontSize: '4rem' }}></i>
             </div>
             <h3 className="fw-bold text-success mb-2">Khairat Kematian</h3>
-            <p className="text-muted mb-4">Surau Ar-Raudhah</p>
+            <p className="text-muted mb-4">Surau Al-Islah</p>
 
             <div className="d-grid gap-3">
               <button

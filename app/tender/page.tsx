@@ -53,7 +53,7 @@ export default function PublicTenderPage() {
         <div className="container">
           <Link href="/" className="navbar-brand d-flex align-items-center">
             <img src="/surau-logo.png" alt="Logo" height="40" className="me-2" onError={(e) => { e.currentTarget.style.display = 'none'; }} />
-            <span className="fw-bold text-success">Surau Ar-Raudhah</span>
+            <span className="fw-bold text-success">Surau Al-Islah</span>
           </Link>
           <div className="ms-auto">
             <Link href="/" className="btn btn-outline-success">
@@ -72,7 +72,7 @@ export default function PublicTenderPage() {
             Tender & Sebut Harga
           </h1>
           <p className="lead mb-0">
-            Senarai tender dan sebut harga yang ditawarkan oleh Surau Ar-Raudhah
+            Senarai tender dan sebut harga yang ditawarkan oleh Surau Al-Islah
           </p>
         </div>
       </div>
@@ -196,7 +196,7 @@ export default function PublicTenderPage() {
         <div className="container text-center">
           <p className="mb-0">
             <i className="bi bi-building me-2"></i>
-            Surau Ar-Raudhah, Saujana Impian, Kajang
+            Surau Al-Islah, Saujana Impian, Kajang
           </p>
           <small className="text-white-50">
             Untuk pertanyaan, sila hubungi pejabat surau.

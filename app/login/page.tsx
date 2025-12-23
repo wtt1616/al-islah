@@ -493,7 +493,7 @@ export default function LoginPage() {
           <span className="navbar-brand mb-0 h1 fw-bold d-flex align-items-center" style={{ color: '#059669' }}>
             <i className="bi bi-mosque me-2" style={{ fontSize: '2rem' }}></i>
             <div>
-              <div style={{ fontSize: '1.5rem', lineHeight: '1.2' }}>Surau Ar-Raudhah</div>
+              <div style={{ fontSize: '1.5rem', lineHeight: '1.2' }}>Surau Al-Islah</div>
               <div style={{ fontSize: '0.875rem', fontWeight: '400', color: '#4b5563' }}>(SAR)</div>
             </div>
           </span>

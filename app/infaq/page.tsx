@@ -7,7 +7,7 @@ export default function InfaqPage() {
 
   const bankInfo = {
     bank: 'Bank Islam',
-    accountName: 'Surau Ar-Raudhah',
+    accountName: 'Surau Al-Islah',
     accountNumber: '12092010036214',
   };
 
@@ -43,7 +43,7 @@ export default function InfaqPage() {
               >
                 <i className="bi bi-heart-fill mb-2" style={{ fontSize: '2.5rem' }}></i>
                 <h2 className="mb-1 fw-bold">Infaq & Sumbangan</h2>
-                <p className="mb-0 opacity-75">Surau Ar-Raudhah</p>
+                <p className="mb-0 opacity-75">Surau Al-Islah</p>
               </div>
 
               {/* QR Code Section */}
@@ -55,7 +55,7 @@ export default function InfaqPage() {
                 <div className="mb-4">
                   <img
                     src="/qr_sar.jpeg"
-                    alt="QR Code Infaq Surau Ar-Raudhah"
+                    alt="QR Code Infaq Surau Al-Islah"
                     className="img-fluid rounded-3 shadow"
                     style={{ maxWidth: '280px' }}
                   />

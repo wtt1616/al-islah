@@ -190,7 +190,7 @@ export default function SemakStatusPage() {
                   <i className="bi bi-search me-2"></i>
                   Semak Status Urusan
                 </h4>
-                <small className="text-muted">Surau Ar-Raudhah, Saujana Impian</small>
+                <small className="text-muted">Surau Al-Islah, Saujana Impian</small>
               </div>
             </div>
           </div>
@@ -525,7 +525,7 @@ export default function SemakStatusPage() {
                 Panduan Semakan Status
               </h5>
               <p className="text-muted mb-3">
-                Gunakan kemudahan ini untuk menyemak status permohonan dan maklum balas anda kepada Surau Ar-Raudhah.
+                Gunakan kemudahan ini untuk menyemak status permohonan dan maklum balas anda kepada Surau Al-Islah.
               </p>
               <div className="row">
                 <div className="col-md-6 col-lg-3 mb-3">

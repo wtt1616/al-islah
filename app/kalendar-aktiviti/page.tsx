@@ -148,7 +148,7 @@ export default function KalendarAktivitiPage() {
                       <i className="bi bi-calendar-event me-2"></i>
                       Kalendar Aktiviti Surau
                     </h4>
-                    <small className="text-muted">Surau Ar-Raudhah, Saujana Impian</small>
+                    <small className="text-muted">Surau Al-Islah, Saujana Impian</small>
                   </div>
                 </div>
               </div>

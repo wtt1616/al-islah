@@ -125,7 +125,7 @@ export default function PermohonanMajlisPage() {
                   </div>
                   <h3 className="text-success mb-3">Permohonan Berjaya Dihantar!</h3>
                   <p className="text-muted mb-4">
-                    Terima kasih atas permohonan anda. Pihak pengurusan Surau Ar-Raudhah akan
+                    Terima kasih atas permohonan anda. Pihak pengurusan Surau Al-Islah akan
                     menghubungi anda selepas permohonan diproses.
                   </p>
                   <div className="d-flex justify-content-center gap-3">
@@ -187,7 +187,7 @@ export default function PermohonanMajlisPage() {
                   <div className="d-flex justify-content-center align-items-center gap-3 mb-3">
                     <Image
                       src="/logo-surau.png"
-                      alt="Logo Surau Ar-Raudhah"
+                      alt="Logo Surau Al-Islah"
                       width={80}
                       height={80}
                       style={{ objectFit: 'contain' }}
@@ -437,7 +437,7 @@ export default function PermohonanMajlisPage() {
                     <div className="card bg-light">
                       <div className="card-body">
                         <p className="mb-3" style={{ fontStyle: 'italic' }}>
-                          "Dengan ini, saya akan memastikan kebersihan & kemudahan Surau Ar-Raudhah,
+                          "Dengan ini, saya akan memastikan kebersihan & kemudahan Surau Al-Islah,
                           Impian Makmur dijaga dengan baik dan sempurna selepas sahaja selesai majlis tersebut."
                         </p>
                         <div className="form-check">

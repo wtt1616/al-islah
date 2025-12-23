@@ -5,7 +5,7 @@ import { usePathname } from 'next/navigation';
 
 const bankInfo = {
   bank: 'Bank Islam',
-  accountName: 'Surau Ar-Raudhah',
+  accountName: 'Surau Al-Islah',
   accountNumber: '12092010036214',
 };
 
@@ -108,7 +108,7 @@ export default function FloatingFooter() {
                 <div className="col text-white">
                   <div className="d-flex align-items-center mb-1">
                     <i className="bi bi-heart-fill me-2 text-warning"></i>
-                    <strong>Infaq Surau Ar-Raudhah</strong>
+                    <strong>Infaq Surau Al-Islah</strong>
                   </div>
                   <div className="small opacity-75 mb-1">
                     <i className="bi bi-bank me-1"></i>

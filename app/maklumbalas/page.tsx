@@ -64,7 +64,7 @@ export default function MaklumbalasPage() {
             </div>
             <h3 className="mb-3">Terima Kasih!</h3>
             <p className="text-muted mb-4">
-              Maklum balas anda telah berjaya dihantar kepada pihak pengurusan Surau Ar-Raudhah.
+              Maklum balas anda telah berjaya dihantar kepada pihak pengurusan Surau Al-Islah.
               Kami akan menghubungi anda melalui WhatsApp atau emel sekiranya terdapat sebarang maklum balas.
             </p>
             <div className="d-flex gap-2 justify-content-center">
@@ -96,7 +96,7 @@ export default function MaklumbalasPage() {
               <div className="mb-3">
                 <i className="bi bi-mosque text-success" style={{ fontSize: '3rem' }}></i>
               </div>
-              <h2 className="fw-bold text-success">Surau Ar-Raudhah</h2>
+              <h2 className="fw-bold text-success">Surau Al-Islah</h2>
               <p className="text-muted">Borang Maklum Balas Awam</p>
             </div>
 
@@ -110,7 +110,7 @@ export default function MaklumbalasPage() {
               </div>
               <div className="card-body p-4">
                 <p className="text-muted mb-4">
-                  Sila lengkapkan borang di bawah untuk menghantar maklum balas, cadangan atau komen kepada pihak pengurusan Surau Ar-Raudhah.
+                  Sila lengkapkan borang di bawah untuk menghantar maklum balas, cadangan atau komen kepada pihak pengurusan Surau Al-Islah.
                   Semua maklumat yang diberikan adalah sulit dan hanya akan digunakan untuk tujuan pengurusan sahaja.
                 </p>
 

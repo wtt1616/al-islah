@@ -64,7 +64,7 @@ export default function AktivitiAdminPage() {
     tarikh_tamat: '',
     masa_mula: '',
     masa_tamat: '',
-    lokasi: 'Surau Ar-Raudhah',
+    lokasi: 'Surau Al-Islah',
     kategori: 'lain_lain',
     penganjur: '',
     no_handphone: '',
@@ -132,7 +132,7 @@ export default function AktivitiAdminPage() {
       tarikh_tamat: '',
       masa_mula: '',
       masa_tamat: '',
-      lokasi: 'Surau Ar-Raudhah',
+      lokasi: 'Surau Al-Islah',
       kategori: 'lain_lain',
       penganjur: '',
       no_handphone: '',
@@ -517,7 +517,7 @@ export default function AktivitiAdminPage() {
                       className="form-control"
                       value={formData.lokasi}
                       onChange={(e) => setFormData({ ...formData, lokasi: e.target.value })}
-                      placeholder="Surau Ar-Raudhah"
+                      placeholder="Surau Al-Islah"
                     />
                   </div>
 
