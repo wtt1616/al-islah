@@ -494,7 +494,7 @@ export default function LoginPage() {
             <i className="bi bi-mosque me-2" style={{ fontSize: '2rem' }}></i>
             <div>
               <div style={{ fontSize: '1.5rem', lineHeight: '1.2' }}>Surau Al-Islah</div>
-              <div style={{ fontSize: '0.875rem', fontWeight: '400', color: '#4b5563' }}>(SAR)</div>
+              <div style={{ fontSize: '0.875rem', fontWeight: '400', color: '#4b5563' }}>Taman Kajang Mewah</div>
             </div>
           </span>
           <div className="d-flex gap-1 gap-md-2 flex-wrap justify-content-end">
