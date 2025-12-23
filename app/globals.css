@@ -1,0 +1,1384 @@
+/* ===== CSS Variables for Design System ===== */
+:root {
+  /* Primary Colors - Islamic/Mosque Inspired */
+  --primary-emerald: #059669;
+  --primary-emerald-dark: #047857;
+  --primary-emerald-light: #10b981;
+  --accent-gold: #f59e0b;
+  --accent-gold-light: #fbbf24;
+
+  /* Neutral Colors */
+  --gray-50: #f9fafb;
+  --gray-100: #f3f4f6;
+  --gray-200: #e5e7eb;
+  --gray-300: #d1d5db;
+  --gray-600: #4b5563;
+  --gray-700: #374151;
+  --gray-800: #1f2937;
+  --gray-900: #111827;
+
+  /* Shadows */
+  --shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+  --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+  --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+  --shadow-xl: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+
+  /* Border Radius */
+  --radius-sm: 0.375rem;
+  --radius-md: 0.5rem;
+  --radius-lg: 0.75rem;
+  --radius-xl: 1rem;
+
+  /* Spacing */
+  --spacing-xs: 0.5rem;
+  --spacing-sm: 0.75rem;
+  --spacing-md: 1rem;
+  --spacing-lg: 1.5rem;
+  --spacing-xl: 2rem;
+  --spacing-2xl: 3rem;
+}
+
+* {
+  box-sizing: border-box;
+  padding: 0;
+  margin: 0;
+}
+
+html,
+body {
+  max-width: 100vw;
+  overflow-x: hidden;
+}
+
+body {
+  background: linear-gradient(135deg, var(--gray-50) 0%, var(--gray-100) 100%);
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen', 'Ubuntu', 'Cantarell', sans-serif;
+  color: var(--gray-800);
+  line-height: 1.6;
+}
+
+/* Typography */
+h1, h2, h3, h4, h5, h6 {
+  font-weight: 700;
+  color: var(--gray-900);
+  letter-spacing: -0.025em;
+}
+
+h2 {
+  font-size: 1.875rem;
+  margin-bottom: var(--spacing-md);
+}
+
+h4 {
+  font-size: 1.25rem;
+}
+
+h5 {
+  font-size: 1.125rem;
+}
+
+/* Navbar Enhancements */
+.navbar-brand {
+  font-weight: 800;
+  font-size: 1.5rem;
+  letter-spacing: -0.5px;
+  text-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+/* Card Enhancements */
+.card {
+  box-shadow: var(--shadow-md);
+  margin-bottom: var(--spacing-lg);
+  border: none;
+  border-radius: var(--radius-lg);
+  transition: all 0.3s ease;
+  background: white;
+}
+
+.card:hover {
+  box-shadow: var(--shadow-lg);
+  transform: translateY(-2px);
+}
+
+.card-header {
+  background: linear-gradient(135deg, var(--primary-emerald) 0%, var(--primary-emerald-dark) 100%);
+  border: none;
+  border-radius: var(--radius-lg) var(--radius-lg) 0 0 !important;
+  padding: var(--spacing-md) var(--spacing-lg);
+  font-weight: 600;
+}
+
+.card-body {
+  padding: var(--spacing-lg);
+}
+
+/* Button Enhancements */
+.btn {
+  border-radius: var(--radius-md);
+  padding: 0.625rem 1.25rem;
+  font-weight: 600;
+  transition: all 0.2s ease;
+  border: none;
+  box-shadow: var(--shadow-sm);
+}
+
+.btn:hover {
+  transform: translateY(-1px);
+  box-shadow: var(--shadow-md);
+}
+
+.btn-success {
+  background: linear-gradient(135deg, var(--primary-emerald) 0%, var(--primary-emerald-dark) 100%);
+}
+
+.btn-success:hover {
+  background: linear-gradient(135deg, var(--primary-emerald-dark) 0%, #065f46 100%);
+}
+
+.btn-primary {
+  background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);
+}
+
+.btn-primary:hover {
+  background: linear-gradient(135deg, #2563eb 0%, #1d4ed8 100%);
+}
+
+.btn-outline-success {
+  border: 2px solid var(--primary-emerald);
+  color: var(--primary-emerald);
+  background: white;
+}
+
+.btn-outline-success:hover {
+  background: var(--primary-emerald);
+  color: white;
+  border-color: var(--primary-emerald);
+}
+
+.btn-secondary {
+  background: var(--gray-600);
+}
+
+.btn-secondary:hover {
+  background: var(--gray-700);
+}
+
+/* Table Enhancements */
+.prayer-schedule-table {
+  border-radius: var(--radius-md);
+  overflow: hidden;
+}
+
+.prayer-schedule-table th {
+  background: linear-gradient(135deg, var(--primary-emerald) 0%, var(--primary-emerald-dark) 100%);
+  color: white;
+  text-align: center;
+  vertical-align: middle;
+  padding: var(--spacing-md);
+  font-weight: 600;
+  text-transform: uppercase;
+  font-size: 0.875rem;
+  letter-spacing: 0.5px;
+}
+
+.prayer-schedule-table td {
+  vertical-align: middle;
+  text-align: center;
+  padding: var(--spacing-md);
+  transition: background-color 0.2s ease;
+}
+
+.prayer-schedule-table tbody tr:hover {
+  background-color: var(--gray-50);
+}
+
+.prayer-time-cell {
+  background: linear-gradient(135deg, var(--gray-100) 0%, var(--gray-200) 100%);
+  font-weight: 700;
+  color: var(--gray-800);
+  text-transform: uppercase;
+  font-size: 0.875rem;
+  letter-spacing: 0.5px;
+}
+
+.table-bordered {
+  border-color: var(--gray-200);
+}
+
+.table-bordered th,
+.table-bordered td {
+  border-color: var(--gray-200);
+}
+
+@media print {
+  .no-print {
+    display: none !important;
+  }
+
+  .print-only {
+    display: block !important;
+  }
+
+  .card {
+    box-shadow: none;
+    border: 1px solid #dee2e6;
+    page-break-inside: avoid;
+  }
+
+  @page {
+    margin: 0.5cm;
+    size: A4 landscape;
+  }
+
+  body {
+    print-color-adjust: exact;
+    -webkit-print-color-adjust: exact;
+  }
+
+  .container {
+    max-width: 100% !important;
+    padding: 0 !important;
+  }
+
+  .prayer-schedule-table {
+    width: 100%;
+    font-size: 10px !important;
+  }
+
+  .prayer-schedule-table th,
+  .prayer-schedule-table td {
+    padding: 4px !important;
+    font-size: 9px !important;
+  }
+
+  .prayer-schedule-table th {
+    background-color: #198754 !important;
+    color: white !important;
+  }
+
+  .prayer-time-cell {
+    background-color: #e9ecef !important;
+  }
+
+  h2 {
+    font-size: 16px !important;
+    margin-bottom: 5px !important;
+  }
+
+  p {
+    font-size: 12px !important;
+    margin-bottom: 10px !important;
+  }
+
+  /* Ensure colored boxes print correctly */
+  .rounded {
+    border: 2px solid !important;
+  }
+
+  /* Hide color legend when printing */
+  .card-header,
+  .btn {
+    display: none !important;
+  }
+
+  .card-body {
+    padding: 5px !important;
+  }
+
+  /* Preacher photo print styles */
+  .rounded-circle,
+  .rounded {
+    print-color-adjust: exact;
+    -webkit-print-color-adjust: exact;
+  }
+
+  img.rounded-circle,
+  .rounded-circle img,
+  img.preacher-photo-schedule {
+    width: 30px !important;
+    height: 30px !important;
+    border: 1px solid #ddd !important;
+    display: inline-block !important;
+    print-color-adjust: exact !important;
+    -webkit-print-color-adjust: exact !important;
+  }
+
+  /* Ensure preacher photos fit in schedule cells */
+  .preacher-photo-schedule {
+    max-width: 40px !important;
+    max-height: 40px !important;
+    object-fit: cover !important;
+  }
+
+  /* Preacher schedule calendar print styles */
+  .calendar-table {
+    width: 100%;
+    font-size: 9px !important;
+  }
+
+  .calendar-table th,
+  .calendar-table td {
+    padding: 3px !important;
+    font-size: 8px !important;
+    border: 1px solid #dee2e6 !important;
+  }
+
+  .calendar-day {
+    height: auto !important;
+    min-height: 90px !important;
+    vertical-align: top !important;
+    page-break-inside: avoid;
+  }
+
+  .calendar-day.other-month {
+    background-color: #f8f9fa !important;
+    opacity: 0.5 !important;
+    print-color-adjust: exact;
+    -webkit-print-color-adjust: exact;
+  }
+
+  .day-number {
+    font-size: 11px !important;
+    font-weight: bold;
+    margin-bottom: 3px !important;
+  }
+
+  .preacher-slots {
+    font-size: 7px !important;
+  }
+
+  .slot {
+    margin-bottom: 2px !important;
+  }
+
+  .slot small {
+    font-size: 6px !important;
+    display: block;
+  }
+
+  /* Keep select dropdowns visible on screen, hide on print */
+  .calendar-day select {
+    display: none !important;
+  }
+}
+
+/* Loading States */
+.loading {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 200px;
+}
+
+/* Alert Enhancements */
+.alert {
+  border-radius: var(--radius-md);
+  border: none;
+  box-shadow: var(--shadow-sm);
+}
+
+.alert-custom {
+  position: fixed;
+  top: 20px;
+  right: 20px;
+  z-index: 9999;
+  min-width: 300px;
+  animation: slideIn 0.3s ease;
+}
+
+.alert-warning {
+  background: linear-gradient(135deg, #fef3c7 0%, #fde68a 100%);
+  color: #78350f;
+  border-left: 4px solid var(--accent-gold);
+}
+
+.alert-danger {
+  background: linear-gradient(135deg, #fee2e2 0%, #fecaca 100%);
+  color: #7f1d1d;
+  border-left: 4px solid #dc2626;
+}
+
+.alert-success {
+  background: linear-gradient(135deg, #d1fae5 0%, #a7f3d0 100%);
+  color: #065f46;
+  border-left: 4px solid var(--primary-emerald);
+}
+
+/* Form Enhancements */
+.form-control,
+.form-select {
+  border-radius: var(--radius-md);
+  border: 2px solid var(--gray-200);
+  padding: 0.625rem 0.875rem;
+  transition: all 0.2s ease;
+}
+
+.form-control:focus,
+.form-select:focus {
+  border-color: var(--primary-emerald);
+  box-shadow: 0 0 0 3px rgba(5, 150, 105, 0.1);
+}
+
+.form-label {
+  font-weight: 600;
+  color: var(--gray-700);
+  margin-bottom: var(--spacing-xs);
+}
+
+/* Dropdown Enhancements */
+.dropdown-menu {
+  border-radius: var(--radius-md);
+  border: none;
+  box-shadow: var(--shadow-lg);
+  padding: var(--spacing-xs);
+  margin-top: 0.5rem;
+}
+
+.dropdown-item {
+  border-radius: var(--radius-sm);
+  padding: 0.625rem 1rem;
+  transition: all 0.2s ease;
+  font-weight: 500;
+}
+
+.dropdown-item:hover {
+  background-color: var(--gray-100);
+  color: var(--primary-emerald);
+}
+
+.dropdown-divider {
+  margin: var(--spacing-xs) 0;
+  border-color: var(--gray-200);
+}
+
+/* Nested Dropdown (Submenu) Support */
+.dropdown-menu .dropend {
+  position: relative;
+}
+
+.dropdown-menu .dropend .dropdown-menu {
+  position: absolute;
+  top: 0;
+  left: 100%;
+  margin-left: 0.125rem;
+  display: none;
+}
+
+.dropdown-menu .dropend:hover > .dropdown-menu,
+.dropdown-menu .dropend > .dropdown-toggle:focus + .dropdown-menu {
+  display: block;
+}
+
+.dropdown-menu .dropend > .dropdown-toggle::after {
+  border-left: 0.3em solid;
+  border-top: 0.3em solid transparent;
+  border-bottom: 0.3em solid transparent;
+  border-right: 0;
+  vertical-align: middle;
+  margin-left: auto;
+}
+
+.dropdown-menu .dropend > .dropdown-toggle {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+/* Dropdown header styling */
+.dropdown-header {
+  font-size: 0.75rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  color: var(--gray-600);
+  padding: 0.5rem 1rem;
+}
+
+/* Scrollable dropdown for long menus */
+.dropdown-menu-lg {
+  max-height: 70vh;
+  overflow-y: auto;
+}
+
+/* Mobile dropdown improvements */
+@media (max-width: 991.98px) {
+  .dropdown-menu-lg {
+    max-height: 50vh;
+  }
+}
+
+/* Modal Enhancements */
+.modal-content {
+  border-radius: var(--radius-xl);
+  border: none;
+  box-shadow: var(--shadow-xl);
+}
+
+.modal-header {
+  border-bottom: 2px solid var(--gray-100);
+  padding: var(--spacing-lg);
+}
+
+.modal-body {
+  padding: var(--spacing-lg);
+}
+
+/* Animations */
+@keyframes slideIn {
+  from {
+    transform: translateX(100%);
+    opacity: 0;
+  }
+  to {
+    transform: translateX(0);
+    opacity: 1;
+  }
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+/* Badge/Pill Enhancements */
+.badge {
+  border-radius: var(--radius-md);
+  padding: 0.375rem 0.75rem;
+  font-weight: 600;
+  font-size: 0.75rem;
+}
+
+/* Rounded Elements */
+.rounded {
+  border-radius: var(--radius-md) !important;
+}
+
+.rounded-circle {
+  box-shadow: var(--shadow-sm);
+}
+
+/* Text Muted */
+.text-muted {
+  color: var(--gray-600) !important;
+}
+
+/* Loading Skeleton */
+.skeleton {
+  background: linear-gradient(90deg, var(--gray-200) 25%, var(--gray-100) 50%, var(--gray-200) 75%);
+  background-size: 200% 100%;
+  animation: loading 1.5s ease-in-out infinite;
+  border-radius: var(--radius-md);
+}
+
+.skeleton-text {
+  height: 1rem;
+  margin-bottom: 0.5rem;
+}
+
+.skeleton-title {
+  height: 1.5rem;
+  width: 60%;
+  margin-bottom: 0.75rem;
+}
+
+.skeleton-card {
+  height: 120px;
+}
+
+.skeleton-table-row {
+  height: 3rem;
+  margin-bottom: 0.5rem;
+}
+
+@keyframes loading {
+  0% {
+    background-position: 200% 0;
+  }
+  100% {
+    background-position: -200% 0;
+  }
+}
+
+/* Empty State */
+.empty-state {
+  text-align: center;
+  padding: var(--spacing-2xl) var(--spacing-lg);
+  color: var(--gray-600);
+}
+
+.empty-state-icon {
+  font-size: 4rem;
+  color: var(--gray-300);
+  margin-bottom: var(--spacing-md);
+}
+
+.empty-state-title {
+  font-size: 1.25rem;
+  font-weight: 600;
+  color: var(--gray-700);
+  margin-bottom: var(--spacing-sm);
+}
+
+.empty-state-description {
+  font-size: 0.95rem;
+  color: var(--gray-500);
+  margin-bottom: var(--spacing-lg);
+}
+
+/* Improved Spinner */
+.spinner-border-success {
+  color: var(--primary-emerald);
+}
+
+.loading-overlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(255, 255, 255, 0.8);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 10;
+  border-radius: var(--radius-lg);
+}
+
+/* ===== MOBILE OPTIMIZATION ===== */
+
+/* Mobile-specific improvements for small screens */
+@media (max-width: 768px) {
+  /* Reduce page padding on mobile */
+  .container {
+    padding-left: 1rem;
+    padding-right: 1rem;
+  }
+
+  /* Stack statistics cards vertically on mobile */
+  .row.g-4, .row.g-3 {
+    gap: 0.75rem !important;
+  }
+
+  /* Smaller headings on mobile */
+  h2 {
+    font-size: 1.5rem;
+  }
+
+  h4 {
+    font-size: 1.1rem;
+  }
+
+  h5 {
+    font-size: 1rem;
+  }
+
+  /* Adjust card padding */
+  .card-body {
+    padding: 1rem;
+  }
+
+  .card-header {
+    padding: 0.75rem 1rem;
+    font-size: 0.95rem;
+  }
+
+  /* Button improvements for touch */
+  .btn {
+    padding: 0.75rem 1rem;
+    font-size: 0.9rem;
+    min-height: 44px; /* iOS minimum touch target */
+  }
+
+  .btn-sm {
+    min-height: 38px;
+    padding: 0.5rem 0.75rem;
+  }
+
+  /* Navbar improvements */
+  .navbar-brand {
+    font-size: 1.25rem;
+  }
+
+  /* Modal improvements */
+  .modal-dialog {
+    margin: 0.5rem;
+  }
+
+  .modal-body {
+    padding: 1rem;
+  }
+
+  /* Form improvements */
+  .form-control, .form-select {
+    font-size: 16px; /* Prevents zoom on iOS */
+    min-height: 44px;
+  }
+
+  /* Table responsive improvements */
+  .table-responsive {
+    margin: -1rem;
+    padding: 1rem;
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+  }
+
+  /* Smaller table text on mobile */
+  .table {
+    font-size: 0.85rem;
+  }
+
+  .table th,
+  .table td {
+    padding: 0.5rem;
+    white-space: nowrap;
+  }
+
+  /* Statistics cards - compact on mobile */
+  .card h3 {
+    font-size: 1.5rem;
+  }
+
+  .card h4 {
+    font-size: 1.25rem;
+  }
+
+  .card .small {
+    font-size: 0.75rem;
+  }
+}
+
+/* Portrait mode - Stack everything vertically */
+@media (max-width: 576px) and (orientation: portrait) {
+  /* Force full width for stat cards */
+  .col-md-3, .col-sm-6 {
+    width: 100%;
+    margin-bottom: 0.75rem;
+  }
+
+  /* Compact prayer schedule table */
+  .prayer-schedule-table {
+    font-size: 0.75rem;
+  }
+
+  .prayer-schedule-table th,
+  .prayer-schedule-table td {
+    padding: 0.4rem 0.25rem;
+    font-size: 0.7rem;
+  }
+
+  /* Hide less important columns on very small screens */
+  .prayer-schedule-table th:first-child,
+  .prayer-schedule-table td:first-child {
+    position: sticky;
+    left: 0;
+    background: white;
+    z-index: 2;
+  }
+
+  .prayer-schedule-table thead th:first-child {
+    background: var(--primary-emerald);
+    z-index: 3;
+  }
+
+  /* Smaller colored boxes for Imam/Bilal */
+  .rounded {
+    font-size: 0.7rem;
+    padding: 0.25rem !important;
+  }
+
+  /* Page headers - more compact */
+  .row.mb-4 {
+    margin-bottom: 1rem !important;
+  }
+
+  .row.mb-4 h2 {
+    font-size: 1.3rem;
+    margin-bottom: 0.25rem;
+  }
+
+  .row.mb-4 .text-muted {
+    font-size: 0.8rem;
+  }
+
+  /* Hide large icons on very small screens */
+  .bi-calendar-week,
+  .bi-people {
+    font-size: 1.5rem !important;
+  }
+}
+
+/* Landscape mode - Optimize for wide schedule viewing */
+@media (max-width: 992px) and (orientation: landscape) {
+  /* Allow more horizontal space for tables */
+  .container {
+    max-width: 100%;
+    padding-left: 0.5rem;
+    padding-right: 0.5rem;
+  }
+
+  /* Reduce vertical spacing */
+  .row.mb-4 {
+    margin-bottom: 0.5rem !important;
+  }
+
+  .card {
+    margin-bottom: 0.75rem;
+  }
+
+  /* Hide statistics cards in landscape to save vertical space */
+  .row.g-4.mb-4.no-print,
+  .row.g-3.mb-4 {
+    display: none;
+  }
+
+  /* Compact table for landscape */
+  .prayer-schedule-table {
+    font-size: 0.8rem;
+  }
+
+  .prayer-schedule-table th,
+  .prayer-schedule-table td {
+    padding: 0.4rem;
+  }
+
+  /* Smaller card padding */
+  .card-body {
+    padding: 0.75rem;
+  }
+
+  .card-header {
+    padding: 0.5rem 0.75rem;
+  }
+
+  /* Compact page header */
+  .row.mb-4 h2 {
+    font-size: 1.2rem;
+  }
+
+  /* Smaller buttons */
+  .btn {
+    padding: 0.5rem 0.75rem;
+    font-size: 0.85rem;
+  }
+}
+
+/* Very small phones */
+@media (max-width: 375px) {
+  .prayer-schedule-table {
+    font-size: 0.65rem;
+  }
+
+  .prayer-schedule-table th,
+  .prayer-schedule-table td {
+    padding: 0.3rem 0.15rem;
+  }
+
+  .btn {
+    font-size: 0.8rem;
+    padding: 0.6rem 0.8rem;
+  }
+
+  h2 {
+    font-size: 1.25rem;
+  }
+}
+
+/* Tablet portrait */
+@media (min-width: 577px) and (max-width: 768px) and (orientation: portrait) {
+  /* 2 columns for stat cards */
+  .col-md-3 {
+    width: 50%;
+  }
+}
+
+/* Tablet landscape - optimize for table viewing */
+@media (min-width: 769px) and (max-width: 1024px) and (orientation: landscape) {
+  .prayer-schedule-table {
+    font-size: 0.85rem;
+  }
+
+  /* Reduce stat card size */
+  .row.g-4.mb-4 .card h3,
+  .row.g-3.mb-4 .card h4 {
+    font-size: 1.3rem;
+  }
+}
+
+/* ===== ADVANCED ANIMATIONS & MICRO-INTERACTIONS ===== */
+
+/* Fade in animation for page load */
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes pulse {
+  0%, 100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.7;
+  }
+}
+
+@keyframes scaleIn {
+  from {
+    transform: scale(0.95);
+    opacity: 0;
+  }
+  to {
+    transform: scale(1);
+    opacity: 1;
+  }
+}
+
+@keyframes shimmer {
+  0% {
+    background-position: -1000px 0;
+  }
+  100% {
+    background-position: 1000px 0;
+  }
+}
+
+/* Apply animations to elements */
+.card {
+  animation: fadeInUp 0.4s ease-out;
+}
+
+.card:nth-child(1) {
+  animation-delay: 0.05s;
+}
+
+.card:nth-child(2) {
+  animation-delay: 0.1s;
+}
+
+.card:nth-child(3) {
+  animation-delay: 0.15s;
+}
+
+.card:nth-child(4) {
+  animation-delay: 0.2s;
+}
+
+/* Button hover effects */
+.btn:active {
+  transform: scale(0.98);
+}
+
+.btn-success:hover,
+.btn-primary:hover,
+.btn-danger:hover,
+.btn-info:hover,
+.btn-warning:hover {
+  box-shadow: 0 8px 16px -4px rgba(0, 0, 0, 0.2);
+}
+
+/* Table row animations */
+.table tbody tr {
+  animation: fadeInUp 0.3s ease-out;
+  transition: all 0.2s ease;
+}
+
+.table tbody tr:hover {
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+  transform: scale(1.01);
+}
+
+/* Nav link animations */
+.nav-link {
+  position: relative;
+  transition: all 0.3s ease;
+}
+
+.nav-link::after {
+  content: '';
+  position: absolute;
+  bottom: 0;
+  left: 50%;
+  width: 0;
+  height: 2px;
+  background: var(--accent-gold);
+  transition: all 0.3s ease;
+  transform: translateX(-50%);
+}
+
+.nav-link:hover::after,
+.nav-link.active::after {
+  width: 80%;
+}
+
+/* Alert slide in */
+.alert {
+  animation: slideIn 0.3s ease-out;
+}
+
+/* Loading spinner enhancement */
+.spinner-border {
+  animation: spinner-border 0.75s linear infinite, pulse 1.5s ease-in-out infinite;
+}
+
+/* Dropdown animations */
+.dropdown-menu {
+  animation: scaleIn 0.2s ease-out;
+  transform-origin: top;
+}
+
+/* Badge pulse on update */
+.badge {
+  transition: all 0.2s ease;
+}
+
+.badge:hover {
+  transform: scale(1.1);
+}
+
+/* Form focus glow */
+.form-control:focus,
+.form-select:focus {
+  animation: pulse 0.5s ease-out;
+}
+
+/* Stat card number animation */
+.card h3,
+.card h4 {
+  transition: all 0.3s ease;
+}
+
+.card:hover h3,
+.card:hover h4 {
+  transform: scale(1.05);
+}
+
+/* Icon rotations on hover */
+.bi:hover {
+  animation: rotate 0.5s ease-in-out;
+}
+
+@keyframes rotate {
+  0% {
+    transform: rotate(0deg);
+  }
+  100% {
+    transform: rotate(360deg);
+  }
+}
+
+/* Smooth page transitions */
+.container {
+  animation: fadeIn 0.3s ease-out;
+}
+
+/* Progress bar animation */
+@keyframes progress {
+  0% {
+    width: 0;
+  }
+  100% {
+    width: 100%;
+  }
+}
+
+.progress-bar {
+  animation: progress 1s ease-out;
+}
+
+/* Checkbox/Radio custom animations */
+.form-check-input {
+  transition: all 0.2s ease;
+}
+
+.form-check-input:checked {
+  animation: scaleIn 0.2s ease-out;
+}
+
+/* Link hover effect */
+a {
+  transition: all 0.2s ease;
+  position: relative;
+}
+
+a:not(.btn):not(.nav-link):not(.navbar-brand):hover {
+  color: var(--primary-emerald-dark);
+}
+
+/* Smooth scroll */
+html {
+  scroll-behavior: smooth;
+}
+
+/* Image load fade in */
+img {
+  animation: fadeIn 0.5s ease-out;
+}
+
+/* Success/Error state transitions */
+.is-valid {
+  animation: pulse 0.3s ease-out;
+}
+
+.is-invalid {
+  animation: shake 0.3s ease-out;
+}
+
+@keyframes shake {
+  0%, 100% {
+    transform: translateX(0);
+  }
+  25% {
+    transform: translateX(-5px);
+  }
+  75% {
+    transform: translateX(5px);
+  }
+}
+
+/* ===== ENHANCED VISUAL POLISH ===== */
+
+/* Enhanced focus ring */
+*:focus-visible {
+  outline: 3px solid rgba(5, 150, 105, 0.3);
+  outline-offset: 2px;
+  border-radius: var(--radius-sm);
+}
+
+/* Better selection color */
+::selection {
+  background-color: var(--primary-emerald);
+  color: white;
+}
+
+::-moz-selection {
+  background-color: var(--primary-emerald);
+  color: white;
+}
+
+/* Custom scrollbar */
+::-webkit-scrollbar {
+  width: 10px;
+  height: 10px;
+}
+
+::-webkit-scrollbar-track {
+  background: var(--gray-100);
+  border-radius: var(--radius-sm);
+}
+
+::-webkit-scrollbar-thumb {
+  background: var(--primary-emerald);
+  border-radius: var(--radius-sm);
+  transition: all 0.3s ease;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: var(--primary-emerald-dark);
+}
+
+/* Enhanced table styling */
+.table thead {
+  position: sticky;
+  top: 0;
+  z-index: 10;
+}
+
+/* Gradient text for headings */
+h1, h2 {
+  background: linear-gradient(135deg, var(--gray-900) 0%, var(--gray-700) 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+/* Icon hover states */
+.bi {
+  transition: all 0.2s ease;
+}
+
+.btn .bi {
+  transition: transform 0.2s ease;
+}
+
+.btn:hover .bi {
+  transform: translateX(2px);
+}
+
+/* Ripple effect on click */
+.btn {
+  position: relative;
+  overflow: hidden;
+}
+
+.btn::before {
+  content: '';
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 0;
+  height: 0;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.5);
+  transform: translate(-50%, -50%);
+  transition: width 0.6s, height 0.6s;
+}
+
+.btn:active::before {
+  width: 300px;
+  height: 300px;
+}
+
+/* Enhanced print styles */
+@media print {
+  * {
+    -webkit-print-color-adjust: exact !important;
+    print-color-adjust: exact !important;
+  }
+
+  .card {
+    page-break-inside: avoid;
+  }
+}
+
+/* Improved accessibility */
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border-width: 0;
+}
+
+/* Better disabled state */
+.btn:disabled,
+.form-control:disabled,
+.form-select:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+  filter: grayscale(50%);
+}
+
+/* Floating action button style (if needed) */
+.fab {
+  position: fixed;
+  bottom: 2rem;
+  right: 2rem;
+  width: 56px;
+  height: 56px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: var(--shadow-xl);
+  z-index: 1000;
+  transition: all 0.3s ease;
+}
+
+.fab:hover {
+  transform: scale(1.1);
+  box-shadow: 0 20px 40px -10px rgba(0, 0, 0, 0.3);
+}
+
+/* Toast notification enhancement */
+.toast {
+  animation: slideIn 0.3s ease-out;
+  box-shadow: var(--shadow-lg);
+  border-radius: var(--radius-lg);
+  border: none;
+}
+
+/* Enhanced status indicators */
+.status-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  display: inline-block;
+  margin-right: 0.5rem;
+  animation: pulse 2s ease-in-out infinite;
+}
+
+.status-dot.active {
+  background-color: #10b981;
+  box-shadow: 0 0 8px rgba(16, 185, 129, 0.5);
+}
+
+.status-dot.inactive {
+  background-color: #6b7280;
+}
+
+/* Skeleton shimmer effect */
+.skeleton {
+  background: linear-gradient(
+    90deg,
+    var(--gray-200) 0%,
+    var(--gray-100) 20%,
+    var(--gray-200) 40%,
+    var(--gray-200) 100%
+  );
+  background-size: 200% 100%;
+  animation: shimmer 1.5s ease-in-out infinite;
+}
+
+/* Improved empty state */
+.empty-state {
+  animation: fadeInUp 0.6s ease-out;
+}
+
+/* Better breadcrumb */
+.breadcrumb {
+  background: transparent;
+  padding: 0;
+  margin-bottom: var(--spacing-md);
+}
+
+.breadcrumb-item {
+  font-size: 0.875rem;
+}
+
+.breadcrumb-item.active {
+  color: var(--primary-emerald);
+  font-weight: 600;
+}
+
+/* Enhanced pagination */
+.page-link {
+  border-radius: var(--radius-md);
+  margin: 0 0.25rem;
+  border: none;
+  transition: all 0.2s ease;
+}
+
+.page-link:hover {
+  background-color: var(--primary-emerald);
+  color: white;
+  transform: scale(1.05);
+}
+
+/* Smooth transitions for all interactive elements */
+button, a, input, select, textarea {
+  transition: all 0.2s ease;
+}
+
+/* Performance optimization - reduce motion for users who prefer it */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}

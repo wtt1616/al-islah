@@ -1,0 +1,53 @@
+# MySQL Configuration for iSAR
+# Copy these settings to C:\xampp\mysql\bin\my.ini
+# Add under [mysqld] section
+
+[mysqld]
+# Connection Settings
+max_connections = 200
+max_user_connections = 50
+max_connect_errors = 100
+
+# Timeout Settings (in seconds)
+wait_timeout = 600          # 10 minutes - close idle connections
+interactive_timeout = 600   # 10 minutes - close idle interactive connections
+connect_timeout = 10        # 10 seconds - timeout for initial connection
+
+# Thread Cache (reuse threads instead of creating new ones)
+thread_cache_size = 16
+
+# Connection Backlog
+back_log = 100
+
+# Performance Settings
+max_allowed_packet = 16M
+key_buffer_size = 256M
+sort_buffer_size = 2M
+read_buffer_size = 2M
+read_rnd_buffer_size = 8M
+myisam_sort_buffer_size = 64M
+thread_stack = 256K
+
+# InnoDB Settings
+innodb_buffer_pool_size = 512M
+innodb_log_file_size = 128M
+innodb_log_buffer_size = 16M
+innodb_flush_log_at_trx_commit = 2
+innodb_lock_wait_timeout = 50
+
+# Query Cache (if enabled)
+query_cache_size = 0        # Disabled by default in newer MySQL
+query_cache_type = 0
+
+# Logging (for debugging connection issues)
+# Uncomment these for troubleshooting:
+# general_log = 1
+# general_log_file = "mysql_general.log"
+# log_error = "mysql_error.log"
+# slow_query_log = 1
+# slow_query_log_file = "mysql_slow_query.log"
+# long_query_time = 2
+
+[client]
+# Client connection timeout
+connect_timeout = 10
