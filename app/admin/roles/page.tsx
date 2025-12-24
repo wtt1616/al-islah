@@ -237,17 +237,21 @@ export default function RolesManagementPage() {
   const openEditModal = (user: User) => {
     setEditingUser(user);
 
-    // For pengguna_dalaman, roles array contains petugas roles from user_roles table
-    // For petugas, roles array contains all their petugas roles
     const userRoles = user.roles || [];
     const petugasRoleValues = [...defaultPetugasRoles.map(r => r.value), ...customRoles.filter(r => r.category === 'petugas' && r.is_active).map(r => r.role_key)];
+    const internalRoleValues = [...defaultInternalRoles.map(r => r.value), ...customRoles.filter(r => r.category === 'pengguna_dalaman' && r.is_active).map(r => r.role_key)];
 
     if (user.user_type === 'pengguna_dalaman') {
-      // For pengguna_dalaman: role field has internal role, roles array may have petugas roles
+      // For pengguna_dalaman: get internal roles from user.role and user.roles
+      const internalUserRoles = userRoles.filter(r => internalRoleValues.includes(r));
+      // Include the main role if it's an internal role
+      if (user.role && internalRoleValues.includes(user.role) && !internalUserRoles.includes(user.role)) {
+        internalUserRoles.unshift(user.role);
+      }
       setEditForm({
         user_type: user.user_type,
         role: user.role || '',
-        roles: [],
+        roles: internalUserRoles.length > 0 ? internalUserRoles : (user.role ? [user.role] : []),
         additional_petugas_roles: userRoles.filter(r => petugasRoleValues.includes(r)),
       });
     } else {
@@ -269,8 +273,8 @@ export default function RolesManagementPage() {
   const handleUserTypeChange = (newUserType: string) => {
     setEditForm({
       user_type: newUserType,
-      role: newUserType === 'pengguna_dalaman' ? 'pegawai' : 'imam',
-      roles: newUserType === 'pengguna_dalaman' ? [] : ['imam'],
+      role: '',
+      roles: [],
       additional_petugas_roles: [],
     });
   };
@@ -304,20 +308,25 @@ export default function RolesManagementPage() {
   const handleSaveRole = async () => {
     if (!editingUser) return;
 
+    // Validate at least one role is selected
+    if (!editForm.roles || editForm.roles.length === 0) {
+      showAlert('danger', 'Sila pilih sekurang-kurangnya satu peranan');
+      return;
+    }
+
     try {
       const payload: any = {
         user_id: editingUser.id,
         user_type: editForm.user_type,
+        roles: editForm.roles,
+        role: editForm.roles[0], // Primary role is the first selected
       };
 
       if (editForm.user_type === 'pengguna_dalaman') {
-        payload.role = editForm.role;
         // Include additional petugas roles if any
         if (editForm.additional_petugas_roles && editForm.additional_petugas_roles.length > 0) {
           payload.additional_petugas_roles = editForm.additional_petugas_roles;
         }
-      } else {
-        payload.roles = editForm.roles;
       }
 
       const response = await fetch('/api/admin/roles', {
@@ -720,19 +729,33 @@ export default function RolesManagementPage() {
                 </div>
 
                 <div className="mb-3">
-                  <label className="form-label"><strong>Peranan Utama</strong></label>
+                  <label className="form-label"><strong>Peranan {editForm.user_type === 'pengguna_dalaman' ? 'Dalaman' : 'Petugas'}</strong></label>
                   {editForm.user_type === 'pengguna_dalaman' ? (
-                    <select
-                      className="form-select"
-                      value={editForm.role}
-                      onChange={(e) => setEditForm({ ...editForm, role: e.target.value })}
-                    >
+                    <div className="border rounded p-3">
+                      <small className="text-muted d-block mb-2">
+                        <i className="bi bi-info-circle me-1"></i>
+                        Pilih satu atau lebih peranan untuk pengguna dalaman ini
+                      </small>
                       {internalRoles.map((role) => (
-                        <option key={role.value} value={role.value}>
-                          {role.label}
-                        </option>
+                        <div key={role.value} className="form-check">
+                          <input
+                            type="checkbox"
+                            className="form-check-input"
+                            id={`internal-role-${role.value}`}
+                            checked={editForm.roles?.includes(role.value) || false}
+                            onChange={() => handleRoleToggle(role.value)}
+                          />
+                          <label className="form-check-label" htmlFor={`internal-role-${role.value}`}>
+                            {role.label}
+                          </label>
+                        </div>
                       ))}
-                    </select>
+                      {editForm.roles?.length === 0 && (
+                        <small className="text-danger d-block mt-2">
+                          Sila pilih sekurang-kurangnya satu peranan
+                        </small>
+                      )}
+                    </div>
                   ) : (
                     <div className="border rounded p-3">
                       <small className="text-muted d-block mb-2">

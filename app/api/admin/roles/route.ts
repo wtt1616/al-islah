@@ -83,31 +83,54 @@ export async function PUT(request: NextRequest) {
     const currentUserId = (session.user as any).id;
 
     if (user_type === 'pengguna_dalaman') {
-      // For pengguna dalaman, single internal role is required
-      if (!role || !allInternalRoles.includes(role)) {
+      // For pengguna dalaman, one or more internal roles are allowed
+      const selectedRoles = roles || (role ? [role] : []);
+
+      if (selectedRoles.length === 0) {
         return NextResponse.json(
-          { error: 'Invalid role for pengguna dalaman' },
+          { error: 'Sekurang-kurangnya satu peranan diperlukan' },
           { status: 400 }
         );
       }
 
-      if (user_id === currentUserId && role !== 'admin') {
+      // Validate all roles are internal roles
+      for (const r of selectedRoles) {
+        if (!allInternalRoles.includes(r)) {
+          return NextResponse.json(
+            { error: `Peranan tidak sah untuk pengguna dalaman: ${r}` },
+            { status: 400 }
+          );
+        }
+      }
+
+      // Prevent admin from removing their own admin role
+      if (user_id === currentUserId && !selectedRoles.includes('admin')) {
         return NextResponse.json(
           { error: 'Anda tidak boleh menukar peranan anda sendiri dari admin' },
           { status: 400 }
         );
       }
 
+      // Set primary role (first role)
+      const primaryRole = selectedRoles[0];
+
       await pool.query(
         'UPDATE users SET user_type = ?, role = ?, updated_at = NOW() WHERE id = ?',
-        [user_type, role, user_id]
+        [user_type, primaryRole, user_id]
       );
 
-      // Handle additional petugas roles (cross-category support)
-      // First, remove existing petugas roles for this user
+      // Update user_roles table - delete existing and insert new internal roles
       await pool.query('DELETE FROM user_roles WHERE user_id = ?', [user_id]);
 
-      // Then, insert any additional petugas roles if provided
+      // Insert all selected internal roles
+      for (const r of selectedRoles) {
+        await pool.query(
+          'INSERT INTO user_roles (user_id, role) VALUES (?, ?) ON DUPLICATE KEY UPDATE role = VALUES(role)',
+          [user_id, r]
+        );
+      }
+
+      // Also insert any additional petugas roles if provided
       if (additional_petugas_roles && Array.isArray(additional_petugas_roles) && additional_petugas_roles.length > 0) {
         for (const r of additional_petugas_roles) {
           if (allPetugasRoles.includes(r)) {
