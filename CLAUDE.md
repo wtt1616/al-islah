@@ -18,6 +18,32 @@ This document tracks all features and changes implemented with Claude Code assis
 
 ## Recent Changes
 
+### 2025-12-24: Server Migration to Surau Al-Islah
+
+Migrated iSAR system to new production server for Surau Al-Islah, Taman Kajang Mewah:
+
+1. **Branding Updates**
+   - Changed "Surau Ar-Raudhah" to "Surau Al-Islah" across all files
+   - Changed "(SAR)" to "Taman Kajang Mewah" on login page
+
+2. **New Server Setup**
+   - Server IP: 117.53.155.172
+   - Primary URL: https://al-islah.isar.my
+   - SSL: Let's Encrypt (auto-renew)
+   - Redirect: isar.my → al-islah.isar.my (301)
+
+3. **Database Fix: user_roles ENUM**
+   - **Bug**: `role` column was ENUM with only 6 original roles
+   - **Symptom**: Custom roles like `al_mulk` saved as empty string
+   - **Solution**: Changed `role` column from ENUM to VARCHAR(50)
+   ```sql
+   ALTER TABLE user_roles MODIFY COLUMN role VARCHAR(50) NOT NULL;
+   ```
+
+4. **API Fix: Empty String Filtering**
+   - Added filter to remove empty strings from roles array in `/api/admin/roles`
+   - Prevents empty role entries in user_roles table
+
 ### 2025-12-21: Database Encryption Fix
 
 Fixed critical bug where encrypted IC numbers were being truncated:
@@ -883,35 +909,42 @@ CREATE TABLE rujukan_kategori (
 
 ## Database Access
 
-### Production Database Credentials
+### Production Database Credentials (Surau Al-Islah Server)
 
 | Setting | Value |
 |---------|-------|
-| Host | `isar.myopensoft.net` |
+| Host | `localhost` (from server) or `117.53.155.172` (remote) |
 | Port | `3306` |
-| User | `myopensoft-isar` |
-| Password | `8zp5RP4IY6pduMucA2FT` |
-| Database | `isar` |
+| User | `isar_user` |
+| Password | `IsarDB2024` |
+| Database | `isar_db` |
 
 ### Access via SSH + MySQL CLI
 
 ```bash
-# SSH into production server
-ssh myopensoft-isar@isar.myopensoft.net -p 8288
+# SSH into production server (Plesk)
+ssh root@117.53.155.172 -p 8288
+# Password: 4r81s0TmSc6UEPtkX8
 
-# Run MySQL query
-mysql -u myopensoft-isar -p'8zp5RP4IY6pduMucA2FT' -h isar.myopensoft.net isar -e "SELECT * FROM users;"
+# Run MySQL query (from server)
+mysql -u isar_user -p'IsarDB2024' isar_db -e "SELECT * FROM users;"
 ```
+
+### Access via Plesk Panel
+
+1. Login to Plesk at https://117.53.155.172:8443
+2. Navigate to Databases > isar_db
+3. Click "phpMyAdmin" to open database admin panel
 
 ### Access via Local phpMyAdmin
 
 To connect phpMyAdmin to production database, add to `C:\xampp\phpMyAdmin\config.inc.php`:
 
 ```php
-/* Production Server */
+/* Production Server - Surau Al-Islah */
 $i++;
-$cfg['Servers'][$i]['verbose'] = 'iSAR Production';
-$cfg['Servers'][$i]['host'] = 'isar.myopensoft.net';
+$cfg['Servers'][$i]['verbose'] = 'iSAR Al-Islah Production';
+$cfg['Servers'][$i]['host'] = '117.53.155.172';
 $cfg['Servers'][$i]['port'] = '3306';
 $cfg['Servers'][$i]['auth_type'] = 'cookie';
 $cfg['Servers'][$i]['user'] = '';
@@ -921,7 +954,7 @@ $cfg['Servers'][$i]['AllowNoPassword'] = false;
 $cfg['Servers'][$i]['connect_type'] = 'tcp';
 ```
 
-Then restart Apache and select "iSAR Production" from the phpMyAdmin login dropdown.
+Then restart Apache and select "iSAR Al-Islah Production" from the phpMyAdmin login dropdown.
 
 ### GUI Database Tools
 
@@ -949,26 +982,27 @@ Compatible tools for remote access:
 
 ## Deployment History
 
-### Production Server Details
-- **URL**: https://isar.myopensoft.net
-- **SSH**: `ssh myopensoft-isar@isar.myopensoft.net -p 8288`
-- **Password**: R57aVmtLpj6JvFHREbtt
-- **App Directory**: ~/isar
-- **Process Manager**: PM2
+### Production Server Details (Surau Al-Islah - as of 2025-12-24)
+- **Primary URL**: https://al-islah.isar.my
+- **Redirect**: isar.my → al-islah.isar.my (301)
+- **Server IP**: 117.53.155.172
+- **SSH**: `ssh root@117.53.155.172 -p 8288`
+- **Password**: 4r81s0TmSc6UEPtkX8
+- **App Directory**: /var/www/vhosts/isar.my/isar
+- **Process Manager**: PM2 (process name: `isar`)
+- **SSL**: Let's Encrypt (auto-renew via Plesk)
+- **Panel**: Plesk at https://117.53.155.172:8443
 
-### Deployment Process (2025-11-17)
-
-#### Initial Git Setup on Production
-```bash
-cd ~/isar
-git init
-git remote add origin https://github.com/wtt1616/isar.git
-git fetch origin
-git checkout -b main origin/main
-```
+### Deployment Process (2025-12-24)
 
 #### Standard Deployment Steps
 ```bash
+# SSH into production server
+ssh root@117.53.155.172 -p 8288
+
+# Navigate to app directory
+cd /var/www/vhosts/isar.my/isar
+
 # Pull latest code
 git pull origin main
 
@@ -988,7 +1022,7 @@ pm2 logs isar --lines 20
 ### Local Development Workflow
 
 #### Making Changes Locally
-1. Make changes on local machine (C:\Users\Lenovo\iSAR)
+1. Make changes on local machine (C:\Users\Lenovo\isar-al-islah)
 2. Test changes: `npm run dev` (runs on http://localhost:3000)
 3. Commit changes to Git:
    ```bash
@@ -998,8 +1032,8 @@ pm2 logs isar --lines 20
    ```
 
 #### Deploying to Production
-1. SSH into production server
-2. Navigate to app directory: `cd ~/isar`
+1. SSH into production server: `ssh root@117.53.155.172 -p 8288`
+2. Navigate to app directory: `cd /var/www/vhosts/isar.my/isar`
 3. Pull latest changes: `git pull origin main`
 4. Install dependencies: `npm install`
 5. Build: `npm run build`
@@ -1110,6 +1144,6 @@ No new dependencies were added for these features. Used existing packages:
 
 ---
 
-**Last Updated**: 2025-12-21
+**Last Updated**: 2025-12-24
 **Updated By**: Claude Code
-**Version**: iSAR v1.5
+**Version**: iSAR v1.6 (Surau Al-Islah)
