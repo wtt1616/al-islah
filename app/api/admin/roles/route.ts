@@ -146,6 +146,9 @@ export async function PUT(request: NextRequest) {
       // For petugas, multiple roles are allowed
       const selectedRoles = roles || (role ? [role] : []);
 
+      console.log('Petugas update - selectedRoles:', selectedRoles);
+      console.log('Petugas update - allPetugasRoles:', allPetugasRoles);
+
       if (selectedRoles.length === 0) {
         return NextResponse.json(
           { error: 'At least one role is required for petugas' },
@@ -156,8 +159,9 @@ export async function PUT(request: NextRequest) {
       // Validate all roles
       for (const r of selectedRoles) {
         if (!allPetugasRoles.includes(r)) {
+          console.log('Invalid role found:', r);
           return NextResponse.json(
-            { error: `Invalid role for petugas: ${r}` },
+            { error: `Peranan tidak sah untuk petugas: ${r}` },
             { status: 400 }
           );
         }
