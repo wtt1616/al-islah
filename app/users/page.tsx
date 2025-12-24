@@ -17,13 +17,17 @@ export default function UsersPage() {
     name: '',
     email: '',
     password: '',
-    role: 'imam',
+    role: '',
     phone: '',
     is_active: true,
   });
   const [alert, setAlert] = useState<{ type: string; message: string } | null>(null);
   const [sortColumn, setSortColumn] = useState<'name' | 'role' | null>(null);
   const [sortDirection, setSortDirection] = useState<'asc' | 'desc'>('asc');
+  const [roles, setRoles] = useState<{
+    pengguna_dalaman: Array<{ value: string; label: string; isSystem: boolean }>;
+    petugas: Array<{ value: string; label: string; isSystem: boolean }>;
+  }>({ pengguna_dalaman: [], petugas: [] });
 
   useEffect(() => {
     if (status === 'unauthenticated') {
@@ -34,9 +38,25 @@ export default function UsersPage() {
         router.push('/dashboard');
       } else {
         fetchUsers();
+        fetchRoles();
       }
     }
   }, [status, session, router]);
+
+  const fetchRoles = async () => {
+    try {
+      const response = await fetch('/api/roles');
+      if (response.ok) {
+        const data = await response.json();
+        setRoles({
+          pengguna_dalaman: data.pengguna_dalaman || [],
+          petugas: data.petugas || [],
+        });
+      }
+    } catch (error) {
+      console.error('Error fetching roles:', error);
+    }
+  };
 
   const fetchUsers = async () => {
     setLoading(true);
@@ -118,7 +138,7 @@ export default function UsersPage() {
       name: '',
       email: '',
       password: '',
-      role: 'imam',
+      role: '',
       phone: '',
       is_active: true,
     });
@@ -435,20 +455,25 @@ export default function UsersPage() {
                         }
                         required
                       >
-                        <optgroup label="Pengguna Dalaman">
-                          <option value="admin">Admin</option>
-                          <option value="bendahari">Bendahari</option>
-                          <option value="aset">Pegawai Aset</option>
-                          <option value="pegawai">Pegawai</option>
-                        </optgroup>
-                        <optgroup label="Petugas">
-                          <option value="head_imam">Ketua Imam</option>
-                          <option value="imam">Imam</option>
-                          <option value="bilal">Bilal</option>
-                          <option value="imam_jumaat">Imam Jumaat</option>
-                          <option value="bilal_jumaat">Bilal Jumaat</option>
-                          <option value="penceramah">Penceramah</option>
-                        </optgroup>
+                        <option value="">-- Pilih Peranan --</option>
+                        {roles.pengguna_dalaman.length > 0 && (
+                          <optgroup label="Pengguna Dalaman">
+                            {roles.pengguna_dalaman.map((role) => (
+                              <option key={role.value} value={role.value}>
+                                {role.label}
+                              </option>
+                            ))}
+                          </optgroup>
+                        )}
+                        {roles.petugas.length > 0 && (
+                          <optgroup label="Petugas">
+                            {roles.petugas.map((role) => (
+                              <option key={role.value} value={role.value}>
+                                {role.label}
+                              </option>
+                            ))}
+                          </optgroup>
+                        )}
                       </select>
                     </div>
                     <div className="mb-3">
