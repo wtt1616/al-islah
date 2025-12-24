@@ -34,9 +34,12 @@ export async function GET(request: NextRequest) {
     const [users] = await pool.query<RowDataPacket[]>(query, params);
 
     // Parse additional_roles from comma-separated string to array
+    // Filter out empty strings to prevent issues
     const usersWithRoles = users.map((user: any) => ({
       ...user,
-      roles: user.additional_roles ? user.additional_roles.split(',') : (user.role ? [user.role] : [])
+      roles: user.additional_roles
+        ? user.additional_roles.split(',').filter((r: string) => r && r.trim() !== '')
+        : (user.role ? [user.role] : [])
     }));
 
     return NextResponse.json({ data: usersWithRoles });
@@ -84,7 +87,9 @@ export async function PUT(request: NextRequest) {
 
     if (user_type === 'pengguna_dalaman') {
       // For pengguna dalaman, one or more internal roles are allowed
-      const selectedRoles = roles || (role ? [role] : []);
+      // Filter out empty strings to prevent issues
+      const rawRoles = roles || (role ? [role] : []);
+      const selectedRoles = rawRoles.filter((r: string) => r && r.trim() !== '');
 
       if (selectedRoles.length === 0) {
         return NextResponse.json(
@@ -144,7 +149,9 @@ export async function PUT(request: NextRequest) {
 
     } else if (user_type === 'petugas') {
       // For petugas, multiple roles are allowed
-      const selectedRoles = roles || (role ? [role] : []);
+      // Filter out empty strings to prevent issues
+      const rawRoles = roles || (role ? [role] : []);
+      const selectedRoles = rawRoles.filter((r: string) => r && r.trim() !== '');
 
       console.log('Petugas update - selectedRoles:', selectedRoles);
       console.log('Petugas update - allPetugasRoles:', allPetugasRoles);
