@@ -306,11 +306,20 @@ export default function RolesManagementPage() {
   };
 
   const handleSaveRole = async () => {
-    if (!editingUser) return;
+    if (!editingUser) {
+      showAlert('danger', 'Tiada pengguna dipilih');
+      return;
+    }
 
     // Validate at least one role is selected
     if (!editForm.roles || editForm.roles.length === 0) {
       showAlert('danger', 'Sila pilih sekurang-kurangnya satu peranan');
+      return;
+    }
+
+    // Validate user_type is set
+    if (!editForm.user_type) {
+      showAlert('danger', 'Jenis pengguna tidak ditetapkan');
       return;
     }
 
@@ -329,23 +338,27 @@ export default function RolesManagementPage() {
         }
       }
 
+      console.log('Saving role with payload:', payload);
+
       const response = await fetch('/api/admin/roles', {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(payload),
       });
 
+      const data = await response.json();
+      console.log('Response:', data);
+
       if (response.ok) {
         showAlert('success', `Peranan ${editingUser.name} berjaya dikemaskini`);
         closeEditModal();
         fetchUsers();
       } else {
-        const error = await response.json();
-        showAlert('danger', error.error || 'Gagal mengemaskini peranan');
+        showAlert('danger', data.error || 'Gagal mengemaskini peranan');
       }
     } catch (error) {
       console.error('Error updating role:', error);
-      showAlert('danger', 'Ralat semasa mengemaskini peranan');
+      showAlert('danger', 'Ralat semasa mengemaskini peranan: ' + (error as Error).message);
     }
   };
 
