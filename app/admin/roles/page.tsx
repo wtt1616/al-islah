@@ -256,10 +256,15 @@ export default function RolesManagementPage() {
       });
     } else {
       // For petugas: roles array has their petugas roles
+      const petugasUserRoles = userRoles.filter(r => petugasRoleValues.includes(r));
+      // Include the main role if it's a petugas role
+      if (user.role && petugasRoleValues.includes(user.role) && !petugasUserRoles.includes(user.role)) {
+        petugasUserRoles.unshift(user.role);
+      }
       setEditForm({
         user_type: user.user_type || 'petugas',
         role: user.role || '',
-        roles: userRoles.length > 0 ? userRoles : (user.role ? [user.role] : []),
+        roles: petugasUserRoles.length > 0 ? petugasUserRoles : (user.role ? [user.role] : []),
         additional_petugas_roles: [],
       });
     }
