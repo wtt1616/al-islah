@@ -62,11 +62,11 @@ export async function GET(request: NextRequest) {
 
       // Use first partial match
       const ahli = partialRecords[0];
-      return await buildResponse(ahli, pool);
+      return await buildResponse(ahli);
     }
 
     const ahli = ahliRecords[0];
-    return await buildResponse(ahli, pool);
+    return await buildResponse(ahli);
 
   } catch (error) {
     console.error('Error searching khairat member:', error);
@@ -77,7 +77,7 @@ export async function GET(request: NextRequest) {
   }
 }
 
-async function buildResponse(ahli: AhliRow, pool: any) {
+async function buildResponse(ahli: AhliRow) {
   // Get tanggungan
   const [tanggunganRows] = await pool.query<RowDataPacket[]>(
     `SELECT nama_penuh, pertalian, no_kp, umur FROM khairat_tanggungan WHERE khairat_ahli_id = ?`,
