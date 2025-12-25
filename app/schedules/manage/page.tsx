@@ -226,7 +226,7 @@ export default function ManageSchedulePage() {
     for (let d = 1; d <= lastDay.getDate(); d++) {
       const date = new Date(selectedYear, selectedMonth - 1, d);
       const dateStr = `${selectedYear}-${String(selectedMonth).padStart(2, '0')}-${String(d).padStart(2, '0')}`;
-      const daySchedules = schedules.filter(s => s.schedule_date.split('T')[0] === dateStr);
+      const daySchedules = schedules.filter(s => s.schedule_date === dateStr);
 
       days.push({
         date: dateStr,

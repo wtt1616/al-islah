@@ -26,14 +26,18 @@ export async function GET(request: NextRequest) {
     }
 
     const [schedules] = await pool.query<RowDataPacket[]>(
-      `SELECT ms.*, u.name as petugas_name
+      `SELECT ms.id, DATE_FORMAT(ms.schedule_date, '%Y-%m-%d') as schedule_date,
+              ms.schedule_type, ms.prayer_time, ms.petugas_id, ms.petugas_role,
+              ms.month_number, ms.year, ms.is_auto_generated, ms.notes,
+              ms.created_by, ms.modified_by, ms.created_at, ms.updated_at,
+              u.name as petugas_name
        FROM monthly_schedules ms
        LEFT JOIN users u ON ms.petugas_id = u.id
        WHERE ms.month_number = ? AND ms.year = ?
        ORDER BY ms.schedule_date,
          FIELD(ms.schedule_type, 'prayer', 'tadabbur', 'tahsin', 'imam_jumaat'),
          FIELD(ms.prayer_time, 'Subuh', 'Zohor', 'Asar', 'Maghrib', 'Isyak'),
-         FIELD(ms.petugas_role, 'imam', 'bilal', 'tadabbur', 'tahsin', 'imam_jumaat')`,
+         FIELD(ms.petugas_role, 'imam', 'bilal', 'siak', 'tadabbur', 'tahsin', 'imam_jumaat')`,
       [month, year]
     );
 
