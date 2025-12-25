@@ -92,28 +92,22 @@ export default function LoginPage() {
   const kuliahTableRef = useRef<HTMLDivElement>(null);
 
   // Define helper functions first (before they are used)
-  const getWednesday = (date: Date) => {
+  const getMonday = (date: Date) => {
     const d = new Date(date);
     const day = d.getDay();
-    // Calculate days to Wednesday (day 3) for the week containing this date
-    // Week runs from Wednesday to Tuesday
+    // Calculate days to Monday (day 1) for the week containing this date
+    // Week runs from Monday to Sunday
     let diff;
     if (day === 0) {
-      // Sunday: go back 4 days to get Wednesday of this week
-      diff = -4;
-    } else if (day === 1) {
-      // Monday: go back 5 days to get Wednesday of this week
-      diff = -5;
-    } else if (day === 2) {
-      // Tuesday: go back 6 days to get Wednesday of this week
+      // Sunday: go back 6 days to get Monday of this week
       diff = -6;
     } else {
-      // Wednesday (3), Thursday (4), Friday (5), Saturday (6): go back (day - 3) days
-      diff = 3 - day;
+      // Monday (1) to Saturday (6): go back (day - 1) days
+      diff = 1 - day;
     }
-    const wednesday = new Date(d);
-    wednesday.setDate(d.getDate() + diff);
-    return wednesday;
+    const monday = new Date(d);
+    monday.setDate(d.getDate() + diff);
+    return monday;
   };
 
   const formatDateOnly = (date: Date): string => {
@@ -126,11 +120,11 @@ export default function LoginPage() {
   // Scroll to today's column function (defined after helper functions)
   const scrollToTodayColumn = () => {
     const today = formatDateOnly(new Date());
-    const wednesday = getWednesday(selectedWeek);
+    const monday = getMonday(selectedWeek);
     const days: string[] = [];
     for (let i = 0; i < 7; i++) {
-      const date = new Date(wednesday);
-      date.setDate(wednesday.getDate() + i);
+      const date = new Date(monday);
+      date.setDate(monday.getDate() + i);
       days.push(formatDateOnly(date));
     }
     const todayIndex = days.indexOf(today);
@@ -305,12 +299,12 @@ export default function LoginPage() {
 
   const fetchSchedules = async () => {
     setSchedulesLoading(true);
-    const wednesday = getWednesday(selectedWeek);
-    const tuesday = new Date(wednesday);
-    tuesday.setDate(wednesday.getDate() + 6);
+    const monday = getMonday(selectedWeek);
+    const sunday = new Date(monday);
+    sunday.setDate(monday.getDate() + 6);
 
-    const startDate = formatDateOnly(wednesday);
-    const endDate = formatDateOnly(tuesday);
+    const startDate = formatDateOnly(monday);
+    const endDate = formatDateOnly(sunday);
 
     try {
       const [schedulesRes, monthlySchedulesRes, preacherSchedulesRes] = await Promise.all([
@@ -378,11 +372,11 @@ export default function LoginPage() {
   };
 
   const getDaysOfWeek = () => {
-    const wednesday = getWednesday(selectedWeek);
+    const monday = getMonday(selectedWeek);
     const days = [];
     for (let i = 0; i < 7; i++) {
-      const date = new Date(wednesday);
-      date.setDate(wednesday.getDate() + i);
+      const date = new Date(monday);
+      date.setDate(monday.getDate() + i);
       days.push(formatDateOnly(date));
     }
     return days;
@@ -511,9 +505,9 @@ export default function LoginPage() {
 
   const days = getDaysOfWeek();
   const prayerTimes = ['Subuh', 'Zohor', 'Asar', 'Maghrib', 'Isyak'];
-  const wednesday = getWednesday(selectedWeek);
-  const tuesday = new Date(wednesday);
-  tuesday.setDate(wednesday.getDate() + 6);
+  const monday = getMonday(selectedWeek);
+  const sunday = new Date(monday);
+  sunday.setDate(monday.getDate() + 6);
 
   return (
     <div className="min-vh-100" style={{ background: 'linear-gradient(135deg, #f9fafb 0%, #f3f4f6 100%)' }}>
@@ -786,7 +780,7 @@ export default function LoginPage() {
                 </h4>
                 <p className="text-muted mb-0 small">
                   <i className="bi bi-calendar-range me-1"></i>
-                  {wednesday.toLocaleDateString('en-MY', { day: 'numeric', month: 'long', year: 'numeric' })} - {tuesday.toLocaleDateString('en-MY', { day: 'numeric', month: 'long', year: 'numeric' })}
+                  {monday.toLocaleDateString('en-MY', { day: 'numeric', month: 'long', year: 'numeric' })} - {sunday.toLocaleDateString('en-MY', { day: 'numeric', month: 'long', year: 'numeric' })}
                 </p>
               </div>
               <div className="col-md-8 text-end">
