@@ -41,13 +41,38 @@ const USER_COLOR_MAP: { [key: number]: { bg: string; text: string; border: strin
   36: { bg: '#AD1457', text: '#FFFFFF', border: '#880E4F' },   // Hj Che Rapi - Dark Magenta
 };
 
-// Fallback colors for users not in the map
+// Fallback colors for users not in the map - 30 unique colors
 const FALLBACK_COLORS = [
-  { bg: '#9C27B0', text: '#FFFFFF', border: '#7B1FA2' },   // Purple
-  { bg: '#3F51B5', text: '#FFFFFF', border: '#303F9F' },   // Indigo
-  { bg: '#009688', text: '#FFFFFF', border: '#00796B' },   // Teal
-  { bg: '#FF5722', text: '#FFFFFF', border: '#E64A19' },   // Deep Orange
-  { bg: '#673AB7', text: '#FFFFFF', border: '#512DA8' },   // Deep Purple
+  { bg: '#E53935', text: '#FFFFFF', border: '#C62828' },   // Red
+  { bg: '#1E88E5', text: '#FFFFFF', border: '#1565C0' },   // Blue
+  { bg: '#43A047', text: '#FFFFFF', border: '#2E7D32' },   // Green
+  { bg: '#FB8C00', text: '#000000', border: '#EF6C00' },   // Orange
+  { bg: '#8E24AA', text: '#FFFFFF', border: '#6A1B9A' },   // Purple
+  { bg: '#00ACC1', text: '#000000', border: '#00838F' },   // Cyan
+  { bg: '#D81B60', text: '#FFFFFF', border: '#AD1457' },   // Pink
+  { bg: '#5E35B1', text: '#FFFFFF', border: '#4527A0' },   // Deep Purple
+  { bg: '#039BE5', text: '#FFFFFF', border: '#0277BD' },   // Light Blue
+  { bg: '#7CB342', text: '#000000', border: '#558B2F' },   // Light Green
+  { bg: '#FFB300', text: '#000000', border: '#FF8F00' },   // Amber
+  { bg: '#3949AB', text: '#FFFFFF', border: '#283593' },   // Indigo
+  { bg: '#00897B', text: '#FFFFFF', border: '#00695C' },   // Teal
+  { bg: '#F4511E', text: '#FFFFFF', border: '#D84315' },   // Deep Orange
+  { bg: '#6D4C41', text: '#FFFFFF', border: '#4E342E' },   // Brown
+  { bg: '#546E7A', text: '#FFFFFF', border: '#37474F' },   // Blue Grey
+  { bg: '#C0CA33', text: '#000000', border: '#9E9D24' },   // Lime
+  { bg: '#EC407A', text: '#FFFFFF', border: '#C2185B' },   // Pink Light
+  { bg: '#26A69A', text: '#FFFFFF', border: '#00897B' },   // Teal Light
+  { bg: '#AB47BC', text: '#FFFFFF', border: '#8E24AA' },   // Purple Light
+  { bg: '#42A5F5', text: '#000000', border: '#1E88E5' },   // Blue Light
+  { bg: '#66BB6A', text: '#000000', border: '#43A047' },   // Green Light
+  { bg: '#FFA726', text: '#000000', border: '#FB8C00' },   // Orange Light
+  { bg: '#EF5350', text: '#FFFFFF', border: '#E53935' },   // Red Light
+  { bg: '#7E57C2', text: '#FFFFFF', border: '#5E35B1' },   // Deep Purple Light
+  { bg: '#26C6DA', text: '#000000', border: '#00ACC1' },   // Cyan Light
+  { bg: '#9CCC65', text: '#000000', border: '#7CB342' },   // Light Green 2
+  { bg: '#FFCA28', text: '#000000', border: '#FFB300' },   // Amber Light
+  { bg: '#5C6BC0', text: '#FFFFFF', border: '#3949AB' },   // Indigo Light
+  { bg: '#78909C', text: '#FFFFFF', border: '#546E7A' },   // Blue Grey Light
 ];
 
 /**
