@@ -54,6 +54,14 @@ export async function GET(request: NextRequest) {
        ORDER BY u.name`
     );
 
+    const [siaks] = await pool.query<RowDataPacket[]>(
+      `SELECT DISTINCT u.id, u.name
+       FROM users u
+       LEFT JOIN user_roles ur ON u.id = ur.user_id
+       WHERE u.is_active = TRUE AND (u.role = 'siak' OR ur.role = 'siak')
+       ORDER BY u.name`
+    );
+
     const [tadabbur] = await pool.query<RowDataPacket[]>(
       `SELECT DISTINCT u.id, u.name
        FROM users u
@@ -83,6 +91,7 @@ export async function GET(request: NextRequest) {
       personnel: {
         imams,
         bilals,
+        siaks,
         tadabbur,
         tahsin,
         imamJumaat

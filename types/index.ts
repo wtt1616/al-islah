@@ -66,7 +66,7 @@ export interface WeekSchedule {
 // =====================================
 
 export type ScheduleType = 'prayer' | 'tadabbur' | 'tahsin' | 'imam_jumaat';
-export type MonthlyPetugasRole = 'imam' | 'bilal' | 'tadabbur' | 'tahsin' | 'imam_jumaat';
+export type MonthlyPetugasRole = 'imam' | 'bilal' | 'siak' | 'tadabbur' | 'tahsin' | 'imam_jumaat';
 
 export interface MonthlySchedule {
   id: number;

@@ -15,6 +15,7 @@ interface Personnel {
 interface PersonnelLists {
   imams: Personnel[];
   bilals: Personnel[];
+  siaks: Personnel[];
   tadabbur: Personnel[];
   tahsin: Personnel[];
   imamJumaat: Personnel[];
@@ -40,7 +41,7 @@ export default function ManageSchedulePage() {
 
   const [schedules, setSchedules] = useState<MonthlySchedule[]>([]);
   const [personnel, setPersonnel] = useState<PersonnelLists>({
-    imams: [], bilals: [], tadabbur: [], tahsin: [], imamJumaat: []
+    imams: [], bilals: [], siaks: [], tadabbur: [], tahsin: [], imamJumaat: []
   });
   const [loading, setLoading] = useState(true);
   const [generating, setGenerating] = useState(false);
@@ -81,7 +82,7 @@ export default function ManageSchedulePage() {
       if (res.ok) {
         const data = await res.json();
         setSchedules(data.schedules || []);
-        setPersonnel(data.personnel || { imams: [], bilals: [], tadabbur: [], tahsin: [], imamJumaat: [] });
+        setPersonnel(data.personnel || { imams: [], bilals: [], siaks: [], tadabbur: [], tahsin: [], imamJumaat: [] });
       }
     } catch (error) {
       console.error('Error fetching data:', error);
@@ -208,6 +209,7 @@ export default function ManageSchedulePage() {
     switch (role) {
       case 'imam': return personnel.imams;
       case 'bilal': return personnel.bilals;
+      case 'siak': return personnel.siaks;
       case 'tadabbur': return personnel.tadabbur;
       case 'tahsin': return personnel.tahsin;
       case 'imam_jumaat': return personnel.imamJumaat;
@@ -451,6 +453,7 @@ export default function ManageSchedulePage() {
                                   {PRAYER_TIMES.map(pt => {
                                     const imamSched = getSchedule(day.schedules, 'prayer', 'imam', pt);
                                     const bilalSched = getSchedule(day.schedules, 'prayer', 'bilal', pt);
+                                    const siakSched = getSchedule(day.schedules, 'prayer', 'siak', pt);
 
                                     return (
                                       <div key={pt} className="mb-1 p-1 rounded" style={{
@@ -489,6 +492,21 @@ export default function ManageSchedulePage() {
                                           title={`Bilal: ${bilalSched?.petugas_name || 'Kosong'}`}
                                         >
                                           B: {bilalSched?.petugas_name?.split(' ')[0] || '-'}
+                                        </div>
+                                        <div
+                                          className="text-truncate"
+                                          style={{
+                                            fontSize: '0.6rem',
+                                            backgroundColor: siakSched?.petugas_id ? getUserColor(siakSched.petugas_id).bg : '#fef3c7',
+                                            color: siakSched?.petugas_id ? getUserColor(siakSched.petugas_id).text : '#92400e',
+                                            padding: '1px 3px',
+                                            borderRadius: '2px',
+                                            cursor: 'pointer'
+                                          }}
+                                          onClick={() => openEditModal(siakSched || null, day.date, 'prayer', 'siak', pt)}
+                                          title={`Siak: ${siakSched?.petugas_name || 'Kosong'}`}
+                                        >
+                                          S: {siakSched?.petugas_name?.split(' ')[0] || '-'}
                                         </div>
                                       </div>
                                     );
@@ -582,13 +600,14 @@ export default function ManageSchedulePage() {
                 </div>
                 <div className="card-body py-2">
                   <div className="row">
-                    {['imam', 'bilal', 'tadabbur', 'tahsin', 'imam_jumaat'].map(role => {
+                    {['imam', 'bilal', 'siak', 'tadabbur', 'tahsin', 'imam_jumaat'].map(role => {
                       const dist = getDistribution(role);
                       if (dist.size === 0) return null;
 
                       const roleLabels: Record<string, string> = {
                         imam: 'Imam',
                         bilal: 'Bilal',
+                        siak: 'Siak',
                         tadabbur: 'Tadabbur',
                         tahsin: 'Tahsin',
                         imam_jumaat: 'Imam Jumaat'

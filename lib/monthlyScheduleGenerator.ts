@@ -93,6 +93,7 @@ export async function generateMonthlySchedule(
   // Fetch all active personnel by role
   const imams = await getActiveUsersByRole('imam');
   const bilals = await getActiveUsersByRole('bilal');
+  const siaks = await getActiveUsersByRole('siak');
   const petugasTadabbur = await getActiveUsersByRole('tadabbur');
   const petugasTahsin = await getActiveUsersByRole('tahsin');
   const imamJumaat = await getActiveUsersByRole('imam_jumaat');
@@ -108,6 +109,7 @@ export async function generateMonthlySchedule(
   // Initialize assignment counters for fair distribution
   const imamAssignments = initializeAssignments(imams);
   const bilalAssignments = initializeAssignments(bilals);
+  const siakAssignments = initializeAssignments(siaks);
   const tadabburAssignments = initializeAssignments(petugasTadabbur);
   const tahsinAssignments = initializeAssignments(petugasTahsin);
   const imamJumaatAssignments = initializeAssignments(imamJumaat);
@@ -151,6 +153,25 @@ export async function generateMonthlySchedule(
           is_auto_generated: true,
           created_by: createdBy
         });
+      }
+
+      // Assign Siak
+      if (siaks.length > 0) {
+        const selectedSiak = selectLeastAssigned(siaks, siakAssignments);
+        if (selectedSiak) {
+          updateAssignment(siakAssignments, selectedSiak.id);
+          schedules.push({
+            schedule_date: dateStr,
+            schedule_type: 'prayer',
+            prayer_time: prayerTime,
+            petugas_id: selectedSiak.id,
+            petugas_role: 'siak',
+            month_number: month,
+            year: year,
+            is_auto_generated: true,
+            created_by: createdBy
+          });
+        }
       }
     }
 
@@ -219,6 +240,7 @@ export async function generateMonthlySchedule(
 export function getDistributionStats(schedules: ScheduleEntry[]): {
   imam: Map<number, number>;
   bilal: Map<number, number>;
+  siak: Map<number, number>;
   tadabbur: Map<number, number>;
   tahsin: Map<number, number>;
   imam_jumaat: Map<number, number>;
@@ -226,6 +248,7 @@ export function getDistributionStats(schedules: ScheduleEntry[]): {
   const stats = {
     imam: new Map<number, number>(),
     bilal: new Map<number, number>(),
+    siak: new Map<number, number>(),
     tadabbur: new Map<number, number>(),
     tahsin: new Map<number, number>(),
     imam_jumaat: new Map<number, number>()
