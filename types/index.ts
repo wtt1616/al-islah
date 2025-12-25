@@ -5,7 +5,7 @@ export type UserType = 'pengguna_dalaman' | 'petugas';
 export type InternalUserRole = 'admin' | 'bendahari' | 'aset' | 'pegawai';
 
 // Peranan Petugas
-export type PetugasRole = 'imam' | 'bilal' | 'imam_jumaat' | 'bilal_jumaat' | 'penceramah' | 'head_imam';
+export type PetugasRole = 'imam' | 'bilal' | 'imam_jumaat' | 'bilal_jumaat' | 'penceramah' | 'head_imam' | 'tadabbur' | 'tahsin';
 
 // Gabungan semua peranan (untuk backward compatibility)
 export type UserRole = InternalUserRole | PetugasRole | 'inventory_staff';
@@ -59,6 +59,59 @@ export interface WeekSchedule {
   startDate: string;
   endDate: string;
   schedules: Schedule[];
+}
+
+// =====================================
+// Monthly Schedule Types
+// =====================================
+
+export type ScheduleType = 'prayer' | 'tadabbur' | 'tahsin' | 'imam_jumaat';
+export type MonthlyPetugasRole = 'imam' | 'bilal' | 'tadabbur' | 'tahsin' | 'imam_jumaat';
+
+export interface MonthlySchedule {
+  id: number;
+  schedule_date: string;
+  schedule_type: ScheduleType;
+  prayer_time: PrayerTime | null;
+  petugas_id: number | null;
+  petugas_role: MonthlyPetugasRole;
+  petugas_name?: string;
+  month_number: number;
+  year: number;
+  is_auto_generated: boolean;
+  created_by?: number;
+  modified_by?: number;
+  notes?: string;
+  created_at: Date;
+  updated_at: Date;
+}
+
+export interface DayScheduleView {
+  date: string;
+  dayOfWeek: number; // 0=Sunday, 1=Monday, ..., 5=Friday, 6=Saturday
+  prayers: {
+    [key in PrayerTime]: {
+      imam_id: number | null;
+      imam_name: string | null;
+      bilal_id: number | null;
+      bilal_name: string | null;
+    };
+  };
+  tadabbur: { petugas_id: number | null; petugas_name: string | null } | null;
+  tahsin: { petugas_id: number | null; petugas_name: string | null };
+  imam_jumaat: { petugas_id: number | null; petugas_name: string | null } | null;
+}
+
+export interface MonthlyStats {
+  totalDays: number;
+  totalPrayerSlots: number;
+  assignedPrayerSlots: number;
+  tadabburDays: number;
+  assignedTadabbur: number;
+  tahsinDays: number;
+  assignedTahsin: number;
+  imamJumaatCount: number;
+  assignedImamJumaat: number;
 }
 
 export interface Inventory {
