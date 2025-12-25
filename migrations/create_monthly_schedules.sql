@@ -12,7 +12,7 @@ CREATE TABLE IF NOT EXISTS monthly_schedules (
   schedule_type ENUM('prayer', 'tadabbur', 'tahsin', 'imam_jumaat') NOT NULL,
   prayer_time ENUM('Subuh', 'Zohor', 'Asar', 'Maghrib', 'Isyak') NULL,
   petugas_id INT NULL COMMENT 'User ID for assigned person',
-  petugas_role ENUM('imam', 'bilal', 'tadabbur', 'tahsin', 'imam_jumaat') NOT NULL,
+  petugas_role ENUM('imam', 'bilal', 'siak', 'tadabbur', 'tahsin', 'imam_jumaat') NOT NULL,
   month_number INT NOT NULL COMMENT 'Month 1-12',
   year INT NOT NULL,
   is_auto_generated BOOLEAN DEFAULT TRUE,

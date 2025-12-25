@@ -16,6 +16,16 @@ interface Schedule {
   bilal_name?: string;
 }
 
+interface MonthlySchedulePublic {
+  id: number;
+  schedule_date: string;
+  schedule_type: 'prayer' | 'tadabbur' | 'tahsin' | 'imam_jumaat';
+  prayer_time: string | null;
+  petugas_id: number | null;
+  petugas_role: 'imam' | 'bilal' | 'siak' | 'tadabbur' | 'tahsin' | 'imam_jumaat';
+  petugas_name: string | null;
+}
+
 interface PreacherSchedule {
   schedule_date: string;
   subuh_preacher_id: number | null;
@@ -61,6 +71,7 @@ export default function LoginPage() {
   const toast = useToast();
   const [showLoginModal, setShowLoginModal] = useState(false);
   const [schedules, setSchedules] = useState<Schedule[]>([]);
+  const [monthlySchedules, setMonthlySchedules] = useState<MonthlySchedulePublic[]>([]);
   const [preacherSchedules, setPreacherSchedules] = useState<PreacherSchedule[]>([]);
   const [schedulesLoading, setSchedulesLoading] = useState(true);
   const [selectedWeek, setSelectedWeek] = useState<Date>(new Date());
@@ -277,7 +288,7 @@ export default function LoginPage() {
 
   // Auto-scroll to today's column when schedules are loaded
   useEffect(() => {
-    if (!schedulesLoading && schedules.length > 0) {
+    if (!schedulesLoading && (monthlySchedules.length > 0 || schedules.length > 0)) {
       // Multiple retries to ensure DOM is fully rendered
       const t1 = setTimeout(scrollToTodayColumn, 100);
       const t2 = setTimeout(scrollToTodayColumn, 300);
@@ -290,7 +301,7 @@ export default function LoginPage() {
         clearTimeout(t4);
       };
     }
-  }, [schedulesLoading, schedules, selectedWeek]);
+  }, [schedulesLoading, schedules, monthlySchedules, selectedWeek]);
 
   const fetchSchedules = async () => {
     setSchedulesLoading(true);
@@ -302,14 +313,19 @@ export default function LoginPage() {
     const endDate = formatDateOnly(tuesday);
 
     try {
-      const [schedulesRes, preacherSchedulesRes] = await Promise.all([
+      const [schedulesRes, monthlySchedulesRes, preacherSchedulesRes] = await Promise.all([
         fetch(`/api/schedules/public?start_date=${startDate}&end_date=${endDate}`),
+        fetch(`/api/monthly-schedules/public?start_date=${startDate}&end_date=${endDate}`),
         fetch(`/api/preacher-schedules?startDate=${startDate}&endDate=${endDate}`),
       ]);
 
       if (schedulesRes.ok) {
         const data = await schedulesRes.json();
         setSchedules(data);
+      }
+      if (monthlySchedulesRes.ok) {
+        const data = await monthlySchedulesRes.json();
+        setMonthlySchedules(data);
       }
       if (preacherSchedulesRes.ok) {
         const data = await preacherSchedulesRes.json();
@@ -375,6 +391,20 @@ export default function LoginPage() {
   const getScheduleForSlot = (date: string, prayerTime: string) => {
     return schedules.find(
       (s) => s.date.split('T')[0] === date && s.prayer_time === prayerTime
+    );
+  };
+
+  // Helper function to get monthly schedule data
+  const getMonthlyScheduleForSlot = (date: string, prayerTime: string | null, role: string) => {
+    return monthlySchedules.find(
+      (s) => s.schedule_date === date && s.prayer_time === prayerTime && s.petugas_role === role
+    );
+  };
+
+  // Helper function to get non-prayer schedule (tadabbur, tahsin, imam_jumaat)
+  const getNonPrayerSchedule = (date: string, scheduleType: string) => {
+    return monthlySchedules.find(
+      (s) => s.schedule_date === date && s.schedule_type === scheduleType
     );
   };
 
@@ -835,18 +865,18 @@ export default function LoginPage() {
             </div>
             <p className="mt-3">Loading schedules...</p>
           </div>
-        ) : schedules.length === 0 ? (
+        ) : monthlySchedules.length === 0 && schedules.length === 0 ? (
           <div className="alert alert-warning">
             No schedule available for this week.
           </div>
         ) : (
           <>
-            {/* Prayer Schedule */}
+            {/* Prayer Schedule - From Monthly Schedules */}
             <div className="card mb-4">
               <div className="card-header text-white">
                 <h6 className="mb-0" style={{ fontSize: '0.9rem' }}>
                   <i className="bi bi-clock me-2"></i>
-                  Prayer Schedule
+                  Jadual Petugas Solat
                 </h6>
               </div>
               <div className="card-body">
@@ -854,7 +884,7 @@ export default function LoginPage() {
                   <table className="table table-bordered" style={{ fontSize: '0.75rem' }}>
                     <thead className="table-light">
                       <tr>
-                        <th style={{ padding: '0.4rem' }}>Prayer Time</th>
+                        <th style={{ padding: '0.4rem' }}>Waktu</th>
                         {days.map((date) => (
                           <th key={date} style={{ padding: '0.4rem' }}>{formatDate(date)}</th>
                         ))}
@@ -865,31 +895,50 @@ export default function LoginPage() {
                         <tr key={prayer}>
                           <td className="fw-bold" style={{ padding: '0.4rem' }}>{prayer}</td>
                           {days.map((date) => {
-                            const schedule = getScheduleForSlot(date, prayer);
+                            const imam = getMonthlyScheduleForSlot(date, prayer, 'imam');
+                            const bilal = getMonthlyScheduleForSlot(date, prayer, 'bilal');
+                            const siak = getMonthlyScheduleForSlot(date, prayer, 'siak');
+                            const hasData = imam || bilal || siak;
                             return (
                               <td key={`${date}-${prayer}`} style={{ padding: '0.3rem' }}>
-                                {schedule ? (
+                                {hasData ? (
                                   <div>
-                                    <div
-                                      className="mb-1 p-1 rounded"
-                                      style={{
-                                        backgroundColor: getUserColor(schedule.imam_id).bg,
-                                        color: getUserColor(schedule.imam_id).text,
-                                        border: `1px solid ${getUserColor(schedule.imam_id).border}`,
-                                      }}
-                                    >
-                                      <strong>Imam:</strong> {schedule.imam_name}
-                                    </div>
-                                    <div
-                                      className="p-1 rounded"
-                                      style={{
-                                        backgroundColor: getUserColor(schedule.bilal_id).bg,
-                                        color: getUserColor(schedule.bilal_id).text,
-                                        border: `1px solid ${getUserColor(schedule.bilal_id).border}`,
-                                      }}
-                                    >
-                                      <strong>Bilal:</strong> {schedule.bilal_name}
-                                    </div>
+                                    {imam && (
+                                      <div
+                                        className="mb-1 p-1 rounded"
+                                        style={{
+                                          backgroundColor: getUserColor(imam.petugas_id).bg,
+                                          color: getUserColor(imam.petugas_id).text,
+                                          border: `1px solid ${getUserColor(imam.petugas_id).border}`,
+                                        }}
+                                      >
+                                        <strong>Imam:</strong> {imam.petugas_name || '-'}
+                                      </div>
+                                    )}
+                                    {bilal && (
+                                      <div
+                                        className="mb-1 p-1 rounded"
+                                        style={{
+                                          backgroundColor: getUserColor(bilal.petugas_id).bg,
+                                          color: getUserColor(bilal.petugas_id).text,
+                                          border: `1px solid ${getUserColor(bilal.petugas_id).border}`,
+                                        }}
+                                      >
+                                        <strong>Bilal:</strong> {bilal.petugas_name || '-'}
+                                      </div>
+                                    )}
+                                    {siak && (
+                                      <div
+                                        className="p-1 rounded"
+                                        style={{
+                                          backgroundColor: getUserColor(siak.petugas_id).bg,
+                                          color: getUserColor(siak.petugas_id).text,
+                                          border: `1px solid ${getUserColor(siak.petugas_id).border}`,
+                                        }}
+                                      >
+                                        <strong>Siak:</strong> {siak.petugas_name || '-'}
+                                      </div>
+                                    )}
                                   </div>
                                 ) : (
                                   <span className="text-muted">-</span>
@@ -899,6 +948,106 @@ export default function LoginPage() {
                           })}
                         </tr>
                       ))}
+                      {/* Tadabbur Row - Monday to Friday only */}
+                      <tr>
+                        <td className="fw-bold" style={{ padding: '0.4rem', backgroundColor: '#e8f5e9' }}>Tadabbur</td>
+                        {days.map((date) => {
+                          const dateObj = new Date(date);
+                          const dayOfWeek = dateObj.getDay();
+                          const tadabbur = getNonPrayerSchedule(date, 'tadabbur');
+
+                          // Tadabbur only on Monday (1) to Friday (5)
+                          if (dayOfWeek === 0 || dayOfWeek === 6) {
+                            return (
+                              <td key={`${date}-tadabbur`} className="text-center text-muted" style={{ padding: '0.3rem', backgroundColor: '#f5f5f5' }}>
+                                -
+                              </td>
+                            );
+                          }
+
+                          return (
+                            <td key={`${date}-tadabbur`} style={{ padding: '0.3rem', backgroundColor: '#e8f5e9' }}>
+                              {tadabbur ? (
+                                <div
+                                  className="p-1 rounded"
+                                  style={{
+                                    backgroundColor: getUserColor(tadabbur.petugas_id).bg,
+                                    color: getUserColor(tadabbur.petugas_id).text,
+                                    border: `1px solid ${getUserColor(tadabbur.petugas_id).border}`,
+                                  }}
+                                >
+                                  {tadabbur.petugas_name || '-'}
+                                </div>
+                              ) : (
+                                <span className="text-muted">-</span>
+                              )}
+                            </td>
+                          );
+                        })}
+                      </tr>
+                      {/* Tahsin Row - Every day */}
+                      <tr>
+                        <td className="fw-bold" style={{ padding: '0.4rem', backgroundColor: '#e3f2fd' }}>Tahsin</td>
+                        {days.map((date) => {
+                          const tahsin = getNonPrayerSchedule(date, 'tahsin');
+
+                          return (
+                            <td key={`${date}-tahsin`} style={{ padding: '0.3rem', backgroundColor: '#e3f2fd' }}>
+                              {tahsin ? (
+                                <div
+                                  className="p-1 rounded"
+                                  style={{
+                                    backgroundColor: getUserColor(tahsin.petugas_id).bg,
+                                    color: getUserColor(tahsin.petugas_id).text,
+                                    border: `1px solid ${getUserColor(tahsin.petugas_id).border}`,
+                                  }}
+                                >
+                                  {tahsin.petugas_name || '-'}
+                                </div>
+                              ) : (
+                                <span className="text-muted">-</span>
+                              )}
+                            </td>
+                          );
+                        })}
+                      </tr>
+                      {/* Imam Jumaat Row - Friday only */}
+                      <tr>
+                        <td className="fw-bold" style={{ padding: '0.4rem', backgroundColor: '#fff3e0' }}>Imam Jumaat</td>
+                        {days.map((date) => {
+                          const dateObj = new Date(date);
+                          const dayOfWeek = dateObj.getDay();
+                          const imamJumaat = getNonPrayerSchedule(date, 'imam_jumaat');
+
+                          // Imam Jumaat only on Friday (5)
+                          if (dayOfWeek !== 5) {
+                            return (
+                              <td key={`${date}-imam-jumaat`} className="text-center text-muted" style={{ padding: '0.3rem', backgroundColor: '#f5f5f5' }}>
+                                -
+                              </td>
+                            );
+                          }
+
+                          return (
+                            <td key={`${date}-imam-jumaat`} style={{ padding: '0.3rem', backgroundColor: '#fff3e0' }}>
+                              {imamJumaat ? (
+                                <div
+                                  className="p-1 rounded"
+                                  style={{
+                                    backgroundColor: getUserColor(imamJumaat.petugas_id).bg,
+                                    color: getUserColor(imamJumaat.petugas_id).text,
+                                    border: `1px solid ${getUserColor(imamJumaat.petugas_id).border}`,
+                                  }}
+                                >
+                                  {imamJumaat.petugas_name || '-'}
+                                </div>
+                              ) : (
+                                <span className="text-muted">-</span>
+                              )}
+                            </td>
+                          );
+                        })}
+                      </tr>
                     </tbody>
                   </table>
                 </div>
