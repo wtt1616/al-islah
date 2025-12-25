@@ -2,13 +2,14 @@
 
 import { useState, useRef } from 'react';
 import Link from 'next/link';
-import { JenisYuran, Pertalian } from '@/types';
+import { Pertalian } from '@/types';
 
 interface Tanggungan {
   nama_penuh: string;
   no_kp: string;
   umur: string;
   pertalian: Pertalian;
+  catatan: string;
 }
 
 export default function KhairatDaftarPage() {
@@ -17,12 +18,8 @@ export default function KhairatDaftarPage() {
     no_kp: '',
     umur: '',
     alamat: '',
-    no_telefon_rumah: '',
     no_hp: '',
-    email: '',
-    jenis_yuran: 'keahlian' as JenisYuran,
-    no_resit: '',
-    amaun_bayaran: '50.00'
+    amaun_bayaran: '40.00'
   });
 
   const [tanggungan, setTanggungan] = useState<Tanggungan[]>([]);
@@ -42,7 +39,11 @@ export default function KhairatDaftarPage() {
   };
 
   const addTanggungan = () => {
-    setTanggungan(prev => [...prev, { nama_penuh: '', no_kp: '', umur: '', pertalian: 'anak' }]);
+    if (tanggungan.length >= 7) {
+      setError('Maksimum 7 tanggungan sahaja dibenarkan');
+      return;
+    }
+    setTanggungan(prev => [...prev, { nama_penuh: '', no_kp: '', umur: '', pertalian: 'anak', catatan: '' }]);
   };
 
   const removeTanggungan = (index: number) => {
@@ -127,6 +128,14 @@ export default function KhairatDaftarPage() {
     setLoading(true);
     setError('');
 
+    // Validate age (18-75)
+    const umur = parseInt(formData.umur);
+    if (umur < 18 || umur > 75) {
+      setError('Umur mestilah antara 18 hingga 75 tahun');
+      setLoading(false);
+      return;
+    }
+
     try {
       // Upload resit file first if selected
       let resitFilePath: string | null = null;
@@ -141,6 +150,7 @@ export default function KhairatDaftarPage() {
           ...formData,
           umur: formData.umur ? parseInt(formData.umur) : null,
           amaun_bayaran: parseFloat(formData.amaun_bayaran),
+          jenis_yuran: 'keahlian',
           resit_file: resitFilePath,
           tanggungan: tanggungan.map(t => ({
             ...t,
@@ -173,8 +183,8 @@ export default function KhairatDaftarPage() {
             </div>
             <h3 className="mb-3">Permohonan Berjaya Dihantar!</h3>
             <p className="text-muted mb-4">
-              Permohonan keahlian khairat kematian anda telah berjaya dihantar kepada pihak pengurusan Masjid Saujana Impian.
-              Anda akan menerima notifikasi melalui WhatsApp atau emel setelah permohonan diluluskan.
+              Permohonan keahlian Khairat Kematian anda telah berjaya dihantar kepada pihak pengurusan Surau al-Islah, Taman Kajang Mewah.
+              Anda akan menerima notifikasi melalui WhatsApp setelah permohonan diluluskan.
             </p>
             <div className="d-flex gap-2 justify-content-center flex-wrap">
               <button
@@ -186,12 +196,8 @@ export default function KhairatDaftarPage() {
                     no_kp: '',
                     umur: '',
                     alamat: '',
-                    no_telefon_rumah: '',
                     no_hp: '',
-                    email: '',
-                    jenis_yuran: 'keahlian',
-                    no_resit: '',
-                    amaun_bayaran: '50.00'
+                    amaun_bayaran: '40.00'
                   });
                   setTanggungan([]);
                   setResitFile(null);
@@ -201,9 +207,9 @@ export default function KhairatDaftarPage() {
                 <i className="bi bi-plus-circle me-2"></i>
                 Hantar Permohonan Lain
               </button>
-              <Link href="/" className="btn btn-outline-secondary">
-                <i className="bi bi-house me-2"></i>
-                Kembali ke Laman Utama
+              <Link href="/khairat" className="btn btn-outline-secondary">
+                <i className="bi bi-arrow-left me-2"></i>
+                Kembali
               </Link>
             </div>
           </div>
@@ -213,18 +219,71 @@ export default function KhairatDaftarPage() {
   }
 
   return (
-    <div className="min-vh-100 bg-light py-5">
+    <div className="min-vh-100 bg-light py-4">
       <div className="container">
         <div className="row justify-content-center">
-          <div className="col-lg-10 col-xl-8">
+          <div className="col-lg-10 col-xl-9">
             {/* Header */}
             <div className="text-center mb-4">
-              <div className="mb-3">
-                <i className="bi bi-mosque text-success" style={{ fontSize: '3rem' }}></i>
+              <img
+                src="/images/surau-logo.png"
+                alt="Logo Surau al-Islah"
+                className="mb-3"
+                style={{ height: '80px' }}
+                onError={(e) => {
+                  e.currentTarget.style.display = 'none';
+                }}
+              />
+              <h4 className="fw-bold text-success mb-1">Surau al-Islah</h4>
+              <p className="text-muted mb-2">Taman Kajang Mewah</p>
+              <h5 className="text-dark">Borang Keahlian Khairat Kematian 2025-2026</h5>
+            </div>
+
+            {/* Info Card */}
+            <div className="card shadow-sm mb-4">
+              <div className="card-body">
+                <p className="small text-muted mb-3">
+                  Khairat Kematian Surau al-Islah, Taman Kajang Mewah adalah berasaskan konsep <strong>tabarru&apos;</strong>.
+                  Dengan kata lain, jika dalam tempoh setahun tidak berlaku kematian dalam kalangan ahli atau tanggungannya,
+                  maka bayaran tahunan yang telah dibayar dikira sebagai sumbangan yang dikumpulkan untuk membantu pembiayaan
+                  pengurusan jenazah ahli lain atau tanggungannya.
+                </p>
+
+                <div className="row g-3">
+                  <div className="col-md-6">
+                    <div className="border rounded p-3 h-100">
+                      <h6 className="fw-bold text-primary mb-2">
+                        <i className="bi bi-info-circle me-2"></i>Maklumat Keahlian
+                      </h6>
+                      <ul className="small mb-0">
+                        <li>Keahlian: Jemaah kariah berumur <strong>18-75 tahun</strong></li>
+                        <li>Bayaran Sesi 2025-2026: <strong>RM40</strong></li>
+                        <li>Tempoh: <strong>1 Julai 2025 - 30 Jun 2026</strong></li>
+                      </ul>
+                    </div>
+                  </div>
+                  <div className="col-md-6">
+                    <div className="border rounded p-3 h-100">
+                      <h6 className="fw-bold text-success mb-2">
+                        <i className="bi bi-gift me-2"></i>Manfaat
+                      </h6>
+                      <ul className="small mb-0">
+                        <li><strong>Ahli & Pasangan:</strong>
+                          <ul className="mb-1">
+                            <li>RM1,600 (Umur 18-70 tahun)</li>
+                            <li>RM1,200 (Umur 71-75 tahun)</li>
+                          </ul>
+                        </li>
+                        <li><strong>Anak</strong> (Sehingga 3 kematian):
+                          <ul className="mb-0">
+                            <li>RM1,000 (6 bulan - 17 tahun / hingga 23 tahun jika masih belajar)</li>
+                          </ul>
+                        </li>
+                      </ul>
+                    </div>
+                  </div>
+                </div>
               </div>
-              <h2 className="fw-bold text-success">Masjid Saujana Impian</h2>
-              <p className="text-muted mb-1">Kajang, Selangor</p>
-              <h4 className="text-dark">Borang Ahli Khairat Kematian</h4>
             </div>
 
             {/* Form Card */}
@@ -232,24 +291,10 @@ export default function KhairatDaftarPage() {
               <div className="card-header bg-success text-white">
                 <h5 className="mb-0">
                   <i className="bi bi-person-plus me-2"></i>
-                  Permohonan Keahlian Baru
+                  Borang Permohonan
                 </h5>
               </div>
               <div className="card-body p-4">
-                {/* Notice */}
-                <div className="alert alert-info mb-4">
-                  <h6 className="alert-heading fw-bold">
-                    <i className="bi bi-info-circle me-2"></i>
-                    Maklumat Penting
-                  </h6>
-                  <ul className="mb-0 small">
-                    <li>Setiap ahli baru akan menempuh tempoh bertenang selama <strong>satu (1) bulan</strong> dari tarikh daftar.</li>
-                    <li>Keahlian yang tidak aktif selama <strong>dua (2) tahun</strong> dengan sendiri gugur keahlian.</li>
-                    <li>Ibu bapa dan mertua <strong>bukan</strong> di bawah tanggungan pemohon.</li>
-                    <li>Anak berumur 19 tahun ke atas sudah berkahwin <strong>bukan</strong> di bawah tanggungan pemohon.</li>
-                  </ul>
-                </div>
-
                 {error && (
                   <div className="alert alert-danger alert-dismissible fade show" role="alert">
                     <i className="bi bi-exclamation-triangle me-2"></i>
@@ -262,14 +307,14 @@ export default function KhairatDaftarPage() {
                   {/* Maklumat Pemohon */}
                   <h6 className="fw-bold border-bottom pb-2 mb-3">
                     <i className="bi bi-person me-2"></i>
-                    Maklumat Pemohon
+                    Maklumat Ahli
                   </h6>
 
                   <div className="row">
                     {/* Nama */}
                     <div className="col-md-6 mb-3">
                       <label htmlFor="nama" className="form-label">
-                        Nama Penuh <span className="text-danger">*</span>
+                        Nama Penuh Ahli <span className="text-danger">*</span>
                       </label>
                       <input
                         type="text"
@@ -278,15 +323,15 @@ export default function KhairatDaftarPage() {
                         name="nama"
                         value={formData.nama}
                         onChange={handleChange}
-                        placeholder="Seperti dalam K/P"
+                        placeholder="Seperti dalam Kad Pengenalan"
                         required
                       />
                     </div>
 
                     {/* No K/P */}
-                    <div className="col-md-4 mb-3">
+                    <div className="col-md-6 mb-3">
                       <label htmlFor="no_kp" className="form-label">
-                        No. K/P <span className="text-danger">*</span>
+                        Nombor Kad Pengenalan <span className="text-danger">*</span>
                       </label>
                       <input
                         type="text"
@@ -297,23 +342,6 @@ export default function KhairatDaftarPage() {
                         onChange={handleChange}
                         placeholder="000000-00-0000"
                         required
-                      />
-                    </div>
-
-                    {/* Umur */}
-                    <div className="col-md-2 mb-3">
-                      <label htmlFor="umur" className="form-label">
-                        Umur
-                      </label>
-                      <input
-                        type="number"
-                        className="form-control"
-                        id="umur"
-                        name="umur"
-                        value={formData.umur}
-                        onChange={handleChange}
-                        min="18"
-                        max="120"
                       />
                     </div>
                   </div>
@@ -336,26 +364,10 @@ export default function KhairatDaftarPage() {
                   </div>
 
                   <div className="row">
-                    {/* No Telefon Rumah */}
-                    <div className="col-md-4 mb-3">
-                      <label htmlFor="no_telefon_rumah" className="form-label">
-                        No. Telefon (R)
-                      </label>
-                      <input
-                        type="tel"
-                        className="form-control"
-                        id="no_telefon_rumah"
-                        name="no_telefon_rumah"
-                        value={formData.no_telefon_rumah}
-                        onChange={handleChange}
-                        placeholder="03-12345678"
-                      />
-                    </div>
-
                     {/* No H/P */}
-                    <div className="col-md-4 mb-3">
+                    <div className="col-md-6 mb-3">
                       <label htmlFor="no_hp" className="form-label">
-                        No. H/P <span className="text-danger">*</span>
+                        Nombor Telefon Bimbit <span className="text-danger">*</span>
                       </label>
                       <input
                         type="tel"
@@ -368,178 +380,29 @@ export default function KhairatDaftarPage() {
                         required
                       />
                       <div className="form-text">
-                        Notifikasi akan dihantar ke nombor ini
+                        Resit akan dihantar melalui WhatsApp ke nombor ini
                       </div>
                     </div>
 
-                    {/* Email */}
-                    <div className="col-md-4 mb-3">
-                      <label htmlFor="email" className="form-label">
-                        E-mel
+                    {/* Umur */}
+                    <div className="col-md-6 mb-3">
+                      <label htmlFor="umur" className="form-label">
+                        Umur pada tahun 2026 <span className="text-danger">*</span>
                       </label>
                       <input
-                        type="email"
+                        type="number"
                         className="form-control"
-                        id="email"
-                        name="email"
-                        value={formData.email}
+                        id="umur"
+                        name="umur"
+                        value={formData.umur}
                         onChange={handleChange}
-                        placeholder="contoh@email.com"
+                        min="18"
+                        max="75"
+                        placeholder="18-75"
+                        required
                       />
-                    </div>
-                  </div>
-
-                  {/* Maklumat Yuran */}
-                  <h6 className="fw-bold border-bottom pb-2 mb-3 mt-4">
-                    <i className="bi bi-cash me-2"></i>
-                    Maklumat Yuran & Bayaran
-                  </h6>
-
-                  <div className="row">
-                    {/* Jenis Yuran */}
-                    <div className="col-md-6 mb-3">
-                      <label className="form-label">
-                        Jenis Yuran <span className="text-danger">*</span>
-                      </label>
-                      <div className="border rounded p-3">
-                        <div className="form-check mb-2">
-                          <input
-                            className="form-check-input"
-                            type="radio"
-                            name="jenis_yuran"
-                            id="yuran_keahlian"
-                            value="keahlian"
-                            checked={formData.jenis_yuran === 'keahlian'}
-                            onChange={handleChange}
-                          />
-                          <label className="form-check-label" htmlFor="yuran_keahlian">
-                            Yuran Keahlian - <strong>RM 50.00</strong>
-                            <br /><small className="text-muted">(Sekali sahaja)</small>
-                          </label>
-                        </div>
-                        <div className="form-check mb-2">
-                          <input
-                            className="form-check-input"
-                            type="radio"
-                            name="jenis_yuran"
-                            id="yuran_tahunan"
-                            value="tahunan"
-                            checked={formData.jenis_yuran === 'tahunan'}
-                            onChange={handleChange}
-                          />
-                          <label className="form-check-label" htmlFor="yuran_tahunan">
-                            Yuran Tahunan - <strong>RM 50.00</strong>
-                            <br /><small className="text-muted">(Setiap tahun)</small>
-                          </label>
-                        </div>
-                        <div className="form-check">
-                          <input
-                            className="form-check-input"
-                            type="radio"
-                            name="jenis_yuran"
-                            id="yuran_isteri_kedua"
-                            value="isteri_kedua"
-                            checked={formData.jenis_yuran === 'isteri_kedua'}
-                            onChange={handleChange}
-                          />
-                          <label className="form-check-label" htmlFor="yuran_isteri_kedua">
-                            Yuran Keahlian Isteri Kedua - <strong>RM 50.00</strong>
-                          </label>
-                        </div>
-                      </div>
-                    </div>
-
-                    {/* Maklumat Bayaran */}
-                    <div className="col-md-6 mb-3">
-                      <label className="form-label">Maklumat Bayaran</label>
-                      <div className="border rounded p-3">
-                        <div className="mb-3">
-                          <label htmlFor="no_resit" className="form-label small">
-                            No. Resit <span className="text-danger">*</span>
-                          </label>
-                          <input
-                            type="text"
-                            className="form-control"
-                            id="no_resit"
-                            name="no_resit"
-                            value={formData.no_resit}
-                            onChange={handleChange}
-                            placeholder="Masukkan no. resit bayaran"
-                            required
-                          />
-                        </div>
-                        <div className="mb-3">
-                          <label htmlFor="amaun_bayaran" className="form-label small">
-                            Amaun (RM)
-                          </label>
-                          <input
-                            type="number"
-                            className="form-control"
-                            id="amaun_bayaran"
-                            name="amaun_bayaran"
-                            value={formData.amaun_bayaran}
-                            onChange={handleChange}
-                            step="0.01"
-                            min="0"
-                          />
-                        </div>
-
-                        {/* Upload Resit */}
-                        <div>
-                          <label className="form-label small">
-                            Muat Naik Resit
-                          </label>
-                          <input
-                            type="file"
-                            ref={fileInputRef}
-                            className="form-control form-control-sm"
-                            accept="image/jpeg,image/jpg,image/png,image/webp,application/pdf"
-                            onChange={handleFileChange}
-                          />
-                          <div className="form-text">
-                            Format: JPEG, PNG, WebP, PDF. Maks: 5MB
-                          </div>
-
-                          {/* File Preview */}
-                          {resitFile && (
-                            <div className="mt-2 p-2 bg-light rounded">
-                              <div className="d-flex align-items-center justify-content-between">
-                                <div className="d-flex align-items-center">
-                                  {resitPreview ? (
-                                    <img
-                                      src={resitPreview}
-                                      alt="Preview resit"
-                                      className="me-2 rounded"
-                                      style={{ width: '50px', height: '50px', objectFit: 'cover' }}
-                                    />
-                                  ) : (
-                                    <div
-                                      className="me-2 bg-danger text-white rounded d-flex align-items-center justify-content-center"
-                                      style={{ width: '50px', height: '50px' }}
-                                    >
-                                      <i className="bi bi-file-pdf"></i>
-                                    </div>
-                                  )}
-                                  <div>
-                                    <small className="d-block text-truncate" style={{ maxWidth: '150px' }}>
-                                      {resitFile.name}
-                                    </small>
-                                    <small className="text-muted">
-                                      {(resitFile.size / 1024).toFixed(1)} KB
-                                    </small>
-                                  </div>
-                                </div>
-                                <button
-                                  type="button"
-                                  className="btn btn-outline-danger btn-sm"
-                                  onClick={removeFile}
-                                >
-                                  <i className="bi bi-x"></i>
-                                </button>
-                              </div>
-                            </div>
-                          )}
-                        </div>
+                      <div className="form-text">
+                        Keahlian dibuka untuk umur 18 hingga 75 tahun
                       </div>
                     </div>
                   </div>
@@ -547,19 +410,8 @@ export default function KhairatDaftarPage() {
                   {/* Tanggungan */}
                   <h6 className="fw-bold border-bottom pb-2 mb-3 mt-4">
                     <i className="bi bi-people me-2"></i>
-                    Senarai Tanggungan
+                    Tanggungan Saya
                   </h6>
-
-                  <div className="alert alert-secondary mb-3">
-                    <small>
-                      <strong>Tanggungan yang layak:</strong>
-                      <ol className="mb-0 ps-3">
-                        <li>Isteri</li>
-                        <li>Anak yang berumur 25 tahun ke bawah dan belum berkahwin</li>
-                        <li>Anak OKU</li>
-                      </ol>
-                    </small>
-                  </div>
 
                   {tanggungan.length === 0 ? (
                     <div className="text-center py-4 bg-light rounded mb-3">
@@ -579,18 +431,19 @@ export default function KhairatDaftarPage() {
                         <table className="table table-bordered">
                           <thead className="table-light">
                             <tr>
-                              <th style={{ width: '40px' }}>No</th>
-                              <th>Nama Penuh</th>
-                              <th style={{ width: '150px' }}>No. K/P</th>
-                              <th style={{ width: '80px' }}>Umur</th>
-                              <th style={{ width: '130px' }}>Pertalian</th>
+                              <th style={{ width: '40px' }}>Bil</th>
+                              <th>Nama</th>
+                              <th style={{ width: '140px' }}>No. KP</th>
+                              <th style={{ width: '100px' }}>Umur (2026)</th>
+                              <th style={{ width: '120px' }}>Pertalian</th>
+                              <th style={{ width: '120px' }}>Catatan</th>
                               <th style={{ width: '50px' }}></th>
                             </tr>
                           </thead>
                           <tbody>
                             {tanggungan.map((t, index) => (
                               <tr key={index}>
-                                <td className="text-center">{index + 1}</td>
+                                <td className="text-center align-middle">{index + 1}</td>
                                 <td>
                                   <input
                                     type="text"
@@ -607,7 +460,7 @@ export default function KhairatDaftarPage() {
                                     className="form-control form-control-sm"
                                     value={t.no_kp}
                                     onChange={(e) => updateTanggungan(index, 'no_kp', e.target.value)}
-                                    placeholder="No. K/P"
+                                    placeholder="No. KP"
                                   />
                                 </td>
                                 <td>
@@ -618,6 +471,7 @@ export default function KhairatDaftarPage() {
                                     onChange={(e) => updateTanggungan(index, 'umur', e.target.value)}
                                     min="0"
                                     max="120"
+                                    placeholder="Umur"
                                   />
                                 </td>
                                 <td>
@@ -626,12 +480,20 @@ export default function KhairatDaftarPage() {
                                     value={t.pertalian}
                                     onChange={(e) => updateTanggungan(index, 'pertalian', e.target.value)}
                                   >
-                                    <option value="isteri">Isteri</option>
+                                    <option value="pasangan">Pasangan</option>
                                     <option value="anak">Anak</option>
-                                    <option value="anak_oku">Anak OKU</option>
                                   </select>
                                 </td>
-                                <td className="text-center">
+                                <td>
+                                  <input
+                                    type="text"
+                                    className="form-control form-control-sm"
+                                    value={t.catatan}
+                                    onChange={(e) => updateTanggungan(index, 'catatan', e.target.value)}
+                                    placeholder="Catatan"
+                                  />
+                                </td>
+                                <td className="text-center align-middle">
                                   <button
                                     type="button"
                                     className="btn btn-outline-danger btn-sm"
@@ -646,16 +508,114 @@ export default function KhairatDaftarPage() {
                           </tbody>
                         </table>
                       </div>
-                      <button
-                        type="button"
-                        className="btn btn-outline-primary btn-sm mb-3"
-                        onClick={addTanggungan}
-                      >
-                        <i className="bi bi-plus-circle me-2"></i>
-                        Tambah Lagi Tanggungan
-                      </button>
+                      {tanggungan.length < 7 && (
+                        <button
+                          type="button"
+                          className="btn btn-outline-primary btn-sm mb-3"
+                          onClick={addTanggungan}
+                        >
+                          <i className="bi bi-plus-circle me-2"></i>
+                          Tambah Lagi Tanggungan
+                        </button>
+                      )}
                     </>
                   )}
+
+                  {/* Maklumat Bayaran */}
+                  <h6 className="fw-bold border-bottom pb-2 mb-3 mt-4">
+                    <i className="bi bi-credit-card me-2"></i>
+                    Maklumat Bayaran
+                  </h6>
+
+                  <div className="row">
+                    <div className="col-md-6 mb-3">
+                      <div className="border rounded p-3 bg-light">
+                        <h6 className="fw-bold mb-2">Kaedah Bayaran:</h6>
+                        <p className="small mb-2">
+                          <strong>1. Pindahan Bank:</strong><br />
+                          Maybank: <strong>562834609705</strong><br />
+                          Nama: Surau al-Islah<br />
+                          Rujukan: <em>&quot;Khairat Kematian&quot;</em>
+                        </p>
+                        <p className="small mb-0">
+                          <strong>2. Tunai:</strong><br />
+                          Bayar kepada Bendahari Surau
+                        </p>
+                      </div>
+                    </div>
+                    <div className="col-md-6 mb-3">
+                      <label className="form-label">Jumlah Bayaran</label>
+                      <div className="input-group mb-3">
+                        <span className="input-group-text">RM</span>
+                        <input
+                          type="number"
+                          className="form-control"
+                          id="amaun_bayaran"
+                          name="amaun_bayaran"
+                          value={formData.amaun_bayaran}
+                          onChange={handleChange}
+                          step="0.01"
+                          min="40"
+                          readOnly
+                        />
+                      </div>
+
+                      {/* Upload Resit */}
+                      <label className="form-label">
+                        Bukti Bayaran (Pilihan)
+                      </label>
+                      <input
+                        type="file"
+                        ref={fileInputRef}
+                        className="form-control form-control-sm"
+                        accept="image/jpeg,image/jpg,image/png,image/webp,application/pdf"
+                        onChange={handleFileChange}
+                      />
+                      <div className="form-text">
+                        Format: JPEG, PNG, WebP, PDF. Maks: 5MB
+                      </div>
+
+                      {/* File Preview */}
+                      {resitFile && (
+                        <div className="mt-2 p-2 bg-white border rounded">
+                          <div className="d-flex align-items-center justify-content-between">
+                            <div className="d-flex align-items-center">
+                              {resitPreview ? (
+                                <img
+                                  src={resitPreview}
+                                  alt="Preview resit"
+                                  className="me-2 rounded"
+                                  style={{ width: '50px', height: '50px', objectFit: 'cover' }}
+                                />
+                              ) : (
+                                <div
+                                  className="me-2 bg-danger text-white rounded d-flex align-items-center justify-content-center"
+                                  style={{ width: '50px', height: '50px' }}
+                                >
+                                  <i className="bi bi-file-pdf"></i>
+                                </div>
+                              )}
+                              <div>
+                                <small className="d-block text-truncate" style={{ maxWidth: '150px' }}>
+                                  {resitFile.name}
+                                </small>
+                                <small className="text-muted">
+                                  {(resitFile.size / 1024).toFixed(1)} KB
+                                </small>
+                              </div>
+                            </div>
+                            <button
+                              type="button"
+                              className="btn btn-outline-danger btn-sm"
+                              onClick={removeFile}
+                            >
+                              <i className="bi bi-x"></i>
+                            </button>
+                          </div>
+                        </div>
+                      )}
+                    </div>
+                  </div>
 
                   {/* Submit Button */}
                   <div className="d-grid gap-2 mt-4">
@@ -667,7 +627,7 @@ export default function KhairatDaftarPage() {
                       {uploadingResit ? (
                         <>
                           <span className="spinner-border spinner-border-sm me-2" role="status"></span>
-                          Memuat naik resit...
+                          Memuat naik...
                         </>
                       ) : loading ? (
                         <>
@@ -694,9 +654,9 @@ export default function KhairatDaftarPage() {
               </small>
               <br />
               <small className="mt-2 d-block">
-                <Link href="/" className="text-decoration-none">
+                <Link href="/khairat" className="text-decoration-none">
                   <i className="bi bi-arrow-left me-1"></i>
-                  Kembali ke Laman Utama
+                  Kembali ke Semakan Khairat
                 </Link>
               </small>
             </div>
