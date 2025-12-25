@@ -7,7 +7,7 @@ import { ResultSetHeader } from 'mysql2';
 // PUT - Update individual schedule
 export async function PUT(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
     const session = await getServerSession(authOptions);
@@ -20,7 +20,7 @@ export async function PUT(
       return NextResponse.json({ error: 'Forbidden' }, { status: 403 });
     }
 
-    const id = params.id;
+    const { id } = await params;
     const body = await request.json();
     const { petugas_id, notes } = body;
 
@@ -50,7 +50,7 @@ export async function PUT(
 // DELETE - Delete individual schedule
 export async function DELETE(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
     const session = await getServerSession(authOptions);
@@ -63,7 +63,7 @@ export async function DELETE(
       return NextResponse.json({ error: 'Forbidden' }, { status: 403 });
     }
 
-    const id = params.id;
+    const { id } = await params;
 
     const [result] = await pool.execute<ResultSetHeader>(
       'DELETE FROM monthly_schedules WHERE id = ?',
