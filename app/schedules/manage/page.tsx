@@ -476,7 +476,7 @@ export default function ManageSchedulePage() {
                                           onClick={() => openEditModal(imamSched || null, day.date, 'prayer', 'imam', pt)}
                                           title={`Imam: ${imamSched?.petugas_name || 'Kosong'}`}
                                         >
-                                          I: {imamSched?.petugas_name?.split(' ')[0] || '-'}
+                                          I: {imamSched?.petugas_name || '-'}
                                         </div>
                                         <div
                                           className="text-truncate"
@@ -491,7 +491,7 @@ export default function ManageSchedulePage() {
                                           onClick={() => openEditModal(bilalSched || null, day.date, 'prayer', 'bilal', pt)}
                                           title={`Bilal: ${bilalSched?.petugas_name || 'Kosong'}`}
                                         >
-                                          B: {bilalSched?.petugas_name?.split(' ')[0] || '-'}
+                                          B: {bilalSched?.petugas_name || '-'}
                                         </div>
                                         <div
                                           className="text-truncate"
@@ -506,7 +506,7 @@ export default function ManageSchedulePage() {
                                           onClick={() => openEditModal(siakSched || null, day.date, 'prayer', 'siak', pt)}
                                           title={`Siak: ${siakSched?.petugas_name || 'Kosong'}`}
                                         >
-                                          S: {siakSched?.petugas_name?.split(' ')[0] || '-'}
+                                          S: {siakSched?.petugas_name || '-'}
                                         </div>
                                       </div>
                                     );
@@ -530,7 +530,7 @@ export default function ManageSchedulePage() {
                                         Tadabbur
                                       </div>
                                       <div className="text-center text-truncate" style={{ fontSize: '0.6rem' }}>
-                                        {getSchedule(day.schedules, 'tadabbur', 'tadabbur')?.petugas_name?.split(' ')[0] || '-'}
+                                        {getSchedule(day.schedules, 'tadabbur', 'tadabbur')?.petugas_name || '-'}
                                       </div>
                                     </div>
                                   )}
@@ -552,7 +552,7 @@ export default function ManageSchedulePage() {
                                       Tahsin
                                     </div>
                                     <div className="text-center text-truncate" style={{ fontSize: '0.6rem' }}>
-                                      {getSchedule(day.schedules, 'tahsin', 'tahsin')?.petugas_name?.split(' ')[0] || '-'}
+                                      {getSchedule(day.schedules, 'tahsin', 'tahsin')?.petugas_name || '-'}
                                     </div>
                                   </div>
 
@@ -574,7 +574,7 @@ export default function ManageSchedulePage() {
                                         Imam Jumaat
                                       </div>
                                       <div className="text-center text-white text-truncate" style={{ fontSize: '0.6rem' }}>
-                                        {getSchedule(day.schedules, 'imam_jumaat', 'imam_jumaat')?.petugas_name?.split(' ')[0] || '-'}
+                                        {getSchedule(day.schedules, 'imam_jumaat', 'imam_jumaat')?.petugas_name || '-'}
                                       </div>
                                     </div>
                                   )}
@@ -632,7 +632,7 @@ export default function ManageSchedulePage() {
                                       fontSize: '0.65rem'
                                     }}
                                   >
-                                    {data.name.split(' ')[0]}: {data.count}x
+                                    {data.name}: {data.count}x
                                   </span>
                                 );
                               })}
