@@ -16,8 +16,8 @@ interface Upload {
 interface Stats {
   total_members: number;
   active_members: number;
-  deceased_members: number;
-  moved_members: number;
+  pending_members: number;
+  total_tanggungan: number;
 }
 
 export default function KhairatUploadPage() {
@@ -94,7 +94,7 @@ export default function KhairatUploadPage() {
       if (res.ok) {
         setMessage({
           type: 'success',
-          text: `Berjaya! ${data.stats.inserted} rekod baru ditambah, ${data.stats.updated} rekod dikemaskini.`
+          text: `Berjaya! ${data.stats.inserted} ahli baru, ${data.stats.updated} ahli dikemaskini, ${data.stats.tanggungan || 0} tanggungan ditambah.`
         });
         setFile(null);
         // Reset file input
@@ -125,7 +125,7 @@ export default function KhairatUploadPage() {
       if (res.ok) {
         setMessage({
           type: 'success',
-          text: `Berjaya! ${data.deleted.members} ahli dan ${data.deleted.payments} rekod bayaran telah dipadam.`
+          text: `Berjaya! ${data.deleted.ahli} ahli dan ${data.deleted.tanggungan} tanggungan telah dipadam.`
         });
         setShowDeleteModal(false);
         fetchData();
@@ -183,24 +183,24 @@ export default function KhairatUploadPage() {
             <div className="col-md-3 mb-3">
               <div className="card bg-success text-white">
                 <div className="card-body">
-                  <h5 className="card-title">Ahli Aktif</h5>
+                  <h5 className="card-title">Ahli Diluluskan</h5>
                   <h2 className="mb-0">{stats.active_members?.toLocaleString() || 0}</h2>
-                </div>
-              </div>
-            </div>
-            <div className="col-md-3 mb-3">
-              <div className="card bg-secondary text-white">
-                <div className="card-body">
-                  <h5 className="card-title">Meninggal Dunia</h5>
-                  <h2 className="mb-0">{stats.deceased_members?.toLocaleString() || 0}</h2>
                 </div>
               </div>
             </div>
             <div className="col-md-3 mb-3">
               <div className="card bg-warning text-dark">
                 <div className="card-body">
-                  <h5 className="card-title">Berpindah</h5>
-                  <h2 className="mb-0">{stats.moved_members?.toLocaleString() || 0}</h2>
+                  <h5 className="card-title">Menunggu Kelulusan</h5>
+                  <h2 className="mb-0">{stats.pending_members?.toLocaleString() || 0}</h2>
+                </div>
+              </div>
+            </div>
+            <div className="col-md-3 mb-3">
+              <div className="card bg-info text-white">
+                <div className="card-body">
+                  <h5 className="card-title">Jumlah Tanggungan</h5>
+                  <h2 className="mb-0">{stats.total_tanggungan?.toLocaleString() || 0}</h2>
                 </div>
               </div>
             </div>
@@ -236,7 +236,7 @@ export default function KhairatUploadPage() {
                 disabled={uploading}
               />
               <div className="form-text">
-                Fail mesti mengandungi sheet "Ahli" dengan lajur: No K/P, Nama Ahli, Alamat, No HP, Email, dll.
+                <strong>Format fail:</strong> BIL, NAMA, KP, Tarikh Lahir, Umur, Status (Ahli/Pasangan/Anak), Jantina, HP, Resit, Alamat, Taman, Permohonan, Cara Bayaran, Bayaran, Catatan
               </div>
             </div>
 
@@ -353,7 +353,7 @@ export default function KhairatUploadPage() {
                   <p>Anda akan memadam:</p>
                   <ul>
                     <li><strong>{stats?.total_members?.toLocaleString() || 0}</strong> rekod ahli</li>
-                    <li>Semua rekod bayaran</li>
+                    <li><strong>{stats?.total_tanggungan?.toLocaleString() || 0}</strong> rekod tanggungan</li>
                     <li>Semua sejarah muat naik</li>
                   </ul>
                   <p className="mb-0">Adakah anda pasti mahu meneruskan?</p>

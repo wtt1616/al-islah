@@ -5,6 +5,25 @@ import pool from '@/lib/db';
 import { RowDataPacket, ResultSetHeader } from 'mysql2';
 import * as XLSX from 'xlsx';
 
+// Column indices based on new format
+interface ColumnIndices {
+  bil: number;
+  nama: number;
+  kp: number;
+  tarikhLahir: number;
+  umur: number;
+  status: number;
+  jantina: number;
+  hp: number;
+  resit: number;
+  alamat: number;
+  taman: number;
+  permohonan: number;
+  caraBayaran: number;
+  bayaran: number;
+  catatan: number;
+}
+
 export async function POST(request: NextRequest) {
   try {
     const session = await getServerSession(authOptions);
@@ -23,260 +42,191 @@ export async function POST(request: NextRequest) {
     const buffer = await file.arrayBuffer();
     const workbook = XLSX.read(buffer, { type: 'buffer' });
 
-    // Find the Ahli sheet
-    const sheetName = workbook.SheetNames.find(name => name.toLowerCase().includes('ahli')) || workbook.SheetNames[1];
+    // Get Sheet1 (or first sheet)
+    const sheetName = workbook.SheetNames[0];
     if (!sheetName) {
-      return NextResponse.json({ error: 'Sheet "Ahli" not found' }, { status: 400 });
+      return NextResponse.json({ error: 'No sheet found in file' }, { status: 400 });
     }
 
     const sheet = workbook.Sheets[sheetName];
     const data = XLSX.utils.sheet_to_json(sheet, { header: 1 }) as any[][];
 
-    // Find header row (row with "no Kad Pengenalan")
-    let headerRowIndex = -1;
-    for (let i = 0; i < Math.min(10, data.length); i++) {
-      const row = data[i];
-      if (row && row.some((cell: any) => cell && String(cell).toLowerCase().includes('kad pengenalan'))) {
-        headerRowIndex = i;
-        break;
-      }
+    if (data.length < 2) {
+      return NextResponse.json({ error: 'File is empty or has no data rows' }, { status: 400 });
     }
 
-    if (headerRowIndex === -1) {
-      return NextResponse.json({ error: 'Header row not found' }, { status: 400 });
-    }
+    // Find header row (row 0 based on the format)
+    const headerRow = data[0];
 
-    const headerRow = data[headerRowIndex];
-
-    // Find column indices
-    const findColIndex = (keywords: string[]) => {
+    // Map column indices
+    const findColIndex = (keywords: string[]): number => {
       return headerRow.findIndex((cell: any) => {
         if (!cell) return false;
         const cellStr = String(cell).toLowerCase();
-        return keywords.some(k => cellStr.includes(k.toLowerCase()));
+        return keywords.some(k => cellStr.toLowerCase().includes(k.toLowerCase()));
       });
     };
 
-    const colIndices = {
-      noKp: findColIndex(['kad pengenalan', 'k/p', 'ic']),
-      noAhli: findColIndex(['no ahli']),
-      nama: findColIndex(['nama ahli']),
+    const colIndices: ColumnIndices = {
+      bil: findColIndex(['bil']),
+      nama: findColIndex(['nama']),
+      kp: findColIndex(['kp', 'k/p', 'kad pengenalan']),
+      tarikhLahir: findColIndex(['tarikh lahir']),
+      umur: findColIndex(['umur']),
+      status: findColIndex(['status']),
+      jantina: findColIndex(['jantina']),
+      hp: findColIndex(['hp', 'telefon']),
+      resit: findColIndex(['resit']),
       alamat: findColIndex(['alamat']),
-      noHp: findColIndex(['hp', 'telefon', 'phone']),
-      email: findColIndex(['email']),
-      tarikhDaftar: findColIndex(['t.daftar', 'tarikh daftar']),
-      pasangan: findColIndex(['isteri', 'suami']),
-      anak1: headerRow.findIndex((cell: any) => cell && String(cell).toLowerCase() === 'anak1'),
-      bapa: findColIndex(['bapa']),
-      ibu: findColIndex(['ibu']),
-      bapaMertua: findColIndex(['bapa mertua']),
-      makMertua: findColIndex(['mak mertua']),
+      taman: findColIndex(['taman']),
+      permohonan: findColIndex(['permohonan']),
+      caraBayaran: findColIndex(['cara bayaran']),
+      bayaran: findColIndex(['bayaran']),
+      catatan: findColIndex(['catatan']),
     };
 
-    // Find year columns (look for "Resit" and year pattern)
-    const yearColumns: { year: number; resitCol: number; amountCol: number }[] = [];
-    for (let i = 0; i < headerRow.length; i++) {
-      const cell = headerRow[i];
-      if (cell) {
-        const cellStr = String(cell);
-        const yearMatch = cellStr.match(/^(20\d{2})$/);
-        if (yearMatch) {
-          const year = parseInt(yearMatch[1]);
-          // Previous column should be Resit
-          yearColumns.push({
-            year,
-            resitCol: i - 1,
-            amountCol: i
-          });
-        }
-      }
+    // Validate required columns
+    if (colIndices.nama === -1 || colIndices.kp === -1 || colIndices.status === -1) {
+      return NextResponse.json({
+        error: 'Lajur wajib tidak dijumpai. Pastikan fail mengandungi: NAMA, KP, Status'
+      }, { status: 400 });
     }
-
-    // Find status columns
-    const statusColIndex = {
-      meninggal: headerRow.findIndex((cell: any) => cell && String(cell).includes('M/DUNIA')),
-      pindah: headerRow.findIndex((cell: any) => cell && String(cell).includes('PINDAH')),
-      gantung: headerRow.findIndex((cell: any) => cell && String(cell).includes('GANTUNG')),
-    };
 
     const connection = await pool.getConnection();
 
     try {
       await connection.beginTransaction();
 
-      let insertedCount = 0;
-      let updatedCount = 0;
+      let ahliInsertedCount = 0;
+      let ahliUpdatedCount = 0;
+      let tanggunganInsertedCount = 0;
       let errorCount = 0;
+      let currentAhliId: number | null = null;
 
-      // Process data rows (skip header)
-      for (let i = headerRowIndex + 1; i < data.length; i++) {
+      // Helper function to parse Excel date
+      const parseExcelDate = (dateVal: any): string | null => {
+        if (!dateVal) return null;
+
+        if (typeof dateVal === 'number') {
+          // Excel date serial number
+          const date = XLSX.SSF.parse_date_code(dateVal);
+          if (date) {
+            return `${date.y}-${String(date.m).padStart(2, '0')}-${String(date.d).padStart(2, '0')}`;
+          }
+        } else if (typeof dateVal === 'string') {
+          // Try parsing string date (DD/MM/YYYY format)
+          const parts = dateVal.split('/');
+          if (parts.length === 3) {
+            return `${parts[2]}-${parts[1].padStart(2, '0')}-${parts[0].padStart(2, '0')}`;
+          }
+        }
+        return null;
+      };
+
+      // Helper function to clean IC number
+      const cleanNoKp = (kp: any): string => {
+        if (!kp) return '';
+        return String(kp).replace(/[-\s]/g, '').trim();
+      };
+
+      // Process data rows (skip header row 0)
+      for (let i = 1; i < data.length; i++) {
         const row = data[i];
         if (!row || row.length === 0) continue;
 
-        const noKp = row[colIndices.noKp];
         const nama = row[colIndices.nama];
+        const noKp = cleanNoKp(row[colIndices.kp]);
+        const statusType = String(row[colIndices.status] || '').trim();
 
-        if (!noKp || !nama) continue;
+        if (!nama || !noKp) continue;
 
-        // Clean IC number
-        const cleanNoKp = String(noKp).replace(/[-\s]/g, '').trim();
-        if (!cleanNoKp) continue;
-
-        // Determine status
-        let status = 'aktif';
-        if (statusColIndex.meninggal >= 0 && row[statusColIndex.meninggal]) {
-          status = 'meninggal';
-        } else if (statusColIndex.pindah >= 0 && row[statusColIndex.pindah]) {
-          status = 'pindah';
-        } else if (statusColIndex.gantung >= 0 && row[statusColIndex.gantung]) {
-          status = 'gantung';
-        }
-
-        // Check for PINDAH or M/DUNIA in payment columns
-        for (const yc of yearColumns) {
-          const resitVal = row[yc.resitCol];
-          const amountVal = row[yc.amountCol];
-          if (resitVal && String(resitVal).includes('PINDAH')) {
-            status = 'pindah';
-            break;
-          }
-          if (resitVal && String(resitVal).includes('M/ DUNIA')) {
-            status = 'meninggal';
-            break;
-          }
-          if (amountVal && String(amountVal).includes('PINDAH')) {
-            status = 'pindah';
-            break;
-          }
-        }
-
-        // Parse date
-        let tarikhDaftar = null;
-        if (row[colIndices.tarikhDaftar]) {
-          const dateVal = row[colIndices.tarikhDaftar];
-          if (typeof dateVal === 'number') {
-            // Excel date serial
-            const date = XLSX.SSF.parse_date_code(dateVal);
-            tarikhDaftar = `${date.y}-${String(date.m).padStart(2, '0')}-${String(date.d).padStart(2, '0')}`;
-          } else if (typeof dateVal === 'string') {
-            // Try parsing string date
-            const parts = dateVal.split('/');
-            if (parts.length === 3) {
-              tarikhDaftar = `${parts[2]}-${parts[1].padStart(2, '0')}-${parts[0].padStart(2, '0')}`;
-            }
-          }
-        }
+        const bil = row[colIndices.bil];
+        const tarikhLahir = parseExcelDate(row[colIndices.tarikhLahir]);
+        const umur = row[colIndices.umur] && !isNaN(Number(row[colIndices.umur])) ? Number(row[colIndices.umur]) : null;
+        const jantina = row[colIndices.jantina] || null;
+        const hp = row[colIndices.hp] ? String(row[colIndices.hp]).trim() : null;
+        const resit = row[colIndices.resit] || null;
+        const alamat = row[colIndices.alamat] || null;
+        const taman = row[colIndices.taman] || null;
+        const caraBayaran = row[colIndices.caraBayaran] || null;
+        const bayaran = row[colIndices.bayaran] && !isNaN(Number(row[colIndices.bayaran])) ? Number(row[colIndices.bayaran]) : null;
+        const catatan = row[colIndices.catatan] || null;
 
         try {
-          // Check if member exists
-          const [existing] = await connection.query<RowDataPacket[]>(
-            'SELECT id FROM khairat_members WHERE no_kp = ?',
-            [cleanNoKp]
-          );
-
-          let memberId: number;
-
-          if (existing.length > 0) {
-            // Update existing
-            memberId = existing[0].id;
-            await connection.query(
-              `UPDATE khairat_members SET
-                no_ahli = ?, nama_ahli = ?, alamat = ?, no_hp = ?, email = ?,
-                tarikh_daftar = ?, pasangan = ?, anak1 = ?, anak2 = ?, anak3 = ?,
-                anak4 = ?, anak5 = ?, anak6 = ?, anak7 = ?, anak8 = ?,
-                bapa = ?, ibu = ?, bapa_mertua = ?, mak_mertua = ?, status_ahli = ?
-              WHERE id = ?`,
-              [
-                row[colIndices.noAhli] || null,
-                nama,
-                row[colIndices.alamat] || null,
-                row[colIndices.noHp] || null,
-                row[colIndices.email] || null,
-                tarikhDaftar,
-                row[colIndices.pasangan] || null,
-                colIndices.anak1 >= 0 ? row[colIndices.anak1] : null,
-                colIndices.anak1 >= 0 ? row[colIndices.anak1 + 1] : null,
-                colIndices.anak1 >= 0 ? row[colIndices.anak1 + 2] : null,
-                colIndices.anak1 >= 0 ? row[colIndices.anak1 + 3] : null,
-                colIndices.anak1 >= 0 ? row[colIndices.anak1 + 4] : null,
-                colIndices.anak1 >= 0 ? row[colIndices.anak1 + 5] : null,
-                colIndices.anak1 >= 0 ? row[colIndices.anak1 + 6] : null,
-                colIndices.anak1 >= 0 ? row[colIndices.anak1 + 7] : null,
-                row[colIndices.bapa] || null,
-                row[colIndices.ibu] || null,
-                row[colIndices.bapaMertua] || null,
-                row[colIndices.makMertua] || null,
-                status,
-                memberId
-              ]
+          if (statusType.toLowerCase() === 'ahli') {
+            // This is a main member - insert/update into khairat_ahli
+            const [existing] = await connection.query<RowDataPacket[]>(
+              'SELECT id FROM khairat_ahli WHERE no_kp = ?',
+              [noKp]
             );
-            updatedCount++;
-          } else {
-            // Insert new
-            const [result] = await connection.query<ResultSetHeader>(
-              `INSERT INTO khairat_members (
-                no_kp, no_ahli, nama_ahli, alamat, no_hp, email,
-                tarikh_daftar, pasangan, anak1, anak2, anak3,
-                anak4, anak5, anak6, anak7, anak8,
-                bapa, ibu, bapa_mertua, mak_mertua, status_ahli
-              ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
-              [
-                cleanNoKp,
-                row[colIndices.noAhli] || null,
-                nama,
-                row[colIndices.alamat] || null,
-                row[colIndices.noHp] || null,
-                row[colIndices.email] || null,
-                tarikhDaftar,
-                row[colIndices.pasangan] || null,
-                colIndices.anak1 >= 0 ? row[colIndices.anak1] : null,
-                colIndices.anak1 >= 0 ? row[colIndices.anak1 + 1] : null,
-                colIndices.anak1 >= 0 ? row[colIndices.anak1 + 2] : null,
-                colIndices.anak1 >= 0 ? row[colIndices.anak1 + 3] : null,
-                colIndices.anak1 >= 0 ? row[colIndices.anak1 + 4] : null,
-                colIndices.anak1 >= 0 ? row[colIndices.anak1 + 5] : null,
-                colIndices.anak1 >= 0 ? row[colIndices.anak1 + 6] : null,
-                colIndices.anak1 >= 0 ? row[colIndices.anak1 + 7] : null,
-                row[colIndices.bapa] || null,
-                row[colIndices.ibu] || null,
-                row[colIndices.bapaMertua] || null,
-                row[colIndices.makMertua] || null,
-                status
-              ]
-            );
-            memberId = result.insertId;
-            insertedCount++;
-          }
 
-          // Process payments
-          for (const yc of yearColumns) {
-            const resitVal = row[yc.resitCol];
-            const amountVal = row[yc.amountCol];
-
-            // Skip if no valid payment data
-            if (!amountVal || typeof amountVal !== 'number') continue;
-            if (String(resitVal).includes('PINDAH') || String(resitVal).includes('M/ DUNIA')) continue;
-
-            let paymentStatus = 'paid';
-            if (String(resitVal).toLowerCase().includes('tunggak')) {
-              paymentStatus = 'tunggak';
-            } else if (String(resitVal).toLowerCase().includes('p/bayar')) {
-              paymentStatus = 'prabayar';
+            if (existing.length > 0) {
+              // Update existing member
+              currentAhliId = existing[0].id;
+              await connection.query(
+                `UPDATE khairat_ahli SET
+                  bil_excel = ?, nama = ?, tarikh_lahir = ?, umur = ?, jantina = ?,
+                  no_hp = ?, no_resit = ?, alamat = ?, taman = ?, cara_bayaran = ?,
+                  amaun_bayaran = ?, catatan = ?, status = 'approved'
+                WHERE id = ?`,
+                [
+                  bil, nama, tarikhLahir, umur, jantina,
+                  hp || '000', resit, alamat, taman, caraBayaran,
+                  bayaran, catatan, currentAhliId
+                ]
+              );
+              ahliUpdatedCount++;
+            } else {
+              // Insert new member
+              const [result] = await connection.query<ResultSetHeader>(
+                `INSERT INTO khairat_ahli (
+                  bil_excel, nama, no_kp, tarikh_lahir, umur, jantina,
+                  no_hp, no_resit, alamat, taman, cara_bayaran,
+                  amaun_bayaran, catatan, jenis_yuran, status, tarikh_daftar
+                ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 'keahlian', 'approved', CURDATE())`,
+                [
+                  bil, nama, noKp, tarikhLahir, umur, jantina,
+                  hp || '000', resit, alamat, taman, caraBayaran,
+                  bayaran, catatan
+                ]
+              );
+              currentAhliId = result.insertId;
+              ahliInsertedCount++;
+            }
+          } else if (currentAhliId && ['pasangan', 'isteri', 'suami', 'anak'].some(s => statusType.toLowerCase().includes(s))) {
+            // This is a dependent - insert into khairat_tanggungan
+            // Map status to pertalian
+            let pertalian = 'anak';
+            if (statusType.toLowerCase().includes('pasangan') ||
+                statusType.toLowerCase().includes('isteri') ||
+                statusType.toLowerCase().includes('suami')) {
+              pertalian = 'pasangan';
             }
 
-            // Upsert payment
-            await connection.query(
-              `INSERT INTO khairat_payments (member_id, tahun, jumlah, no_resit, status)
-               VALUES (?, ?, ?, ?, ?)
-               ON DUPLICATE KEY UPDATE jumlah = VALUES(jumlah), no_resit = VALUES(no_resit), status = VALUES(status)`,
-              [
-                memberId,
-                yc.year,
-                amountVal,
-                resitVal && typeof resitVal !== 'number' ? null : resitVal,
-                paymentStatus
-              ]
+            // Check if tanggungan already exists
+            const [existingTanggungan] = await connection.query<RowDataPacket[]>(
+              'SELECT id FROM khairat_tanggungan WHERE khairat_ahli_id = ? AND no_kp = ?',
+              [currentAhliId, noKp]
             );
+
+            if (existingTanggungan.length > 0) {
+              // Update existing tanggungan
+              await connection.query(
+                `UPDATE khairat_tanggungan SET
+                  nama_penuh = ?, tarikh_lahir = ?, umur = ?, jantina = ?, pertalian = ?
+                WHERE id = ?`,
+                [nama, tarikhLahir, umur, jantina, pertalian, existingTanggungan[0].id]
+              );
+            } else {
+              // Insert new tanggungan
+              await connection.query(
+                `INSERT INTO khairat_tanggungan (
+                  khairat_ahli_id, nama_penuh, no_kp, tarikh_lahir, umur, jantina, pertalian
+                ) VALUES (?, ?, ?, ?, ?, ?, ?)`,
+                [currentAhliId, nama, noKp, tarikhLahir, umur, jantina, pertalian]
+              );
+              tanggunganInsertedCount++;
+            }
           }
         } catch (rowError) {
           console.error(`Error processing row ${i}:`, rowError);
@@ -287,19 +237,20 @@ export async function POST(request: NextRequest) {
       // Record upload
       await connection.query(
         'INSERT INTO khairat_uploads (filename, uploaded_by, total_records) VALUES (?, ?, ?)',
-        [file.name, session.user.id, insertedCount + updatedCount]
+        [file.name, session.user.id, ahliInsertedCount + ahliUpdatedCount + tanggunganInsertedCount]
       );
 
       await connection.commit();
 
       return NextResponse.json({
         success: true,
-        message: 'File uploaded successfully',
+        message: 'Fail berjaya dimuat naik',
         stats: {
-          inserted: insertedCount,
-          updated: updatedCount,
+          inserted: ahliInsertedCount,
+          updated: ahliUpdatedCount,
+          tanggungan: tanggunganInsertedCount,
           errors: errorCount,
-          total: insertedCount + updatedCount
+          total: ahliInsertedCount + ahliUpdatedCount + tanggunganInsertedCount
         }
       });
 
@@ -313,7 +264,7 @@ export async function POST(request: NextRequest) {
   } catch (error) {
     console.error('Error uploading khairat file:', error);
     return NextResponse.json(
-      { error: 'Failed to upload file' },
+      { error: 'Gagal memuat naik fail: ' + (error as Error).message },
       { status: 500 }
     );
   }
@@ -334,18 +285,23 @@ export async function GET(request: NextRequest) {
        LIMIT 20`
     );
 
+    // Get stats from khairat_ahli table (new format)
     const [stats] = await pool.query<RowDataPacket[]>(
       `SELECT
-        COUNT(*) as total_members,
-        SUM(CASE WHEN status_ahli = 'aktif' THEN 1 ELSE 0 END) as active_members,
-        SUM(CASE WHEN status_ahli = 'meninggal' THEN 1 ELSE 0 END) as deceased_members,
-        SUM(CASE WHEN status_ahli = 'pindah' THEN 1 ELSE 0 END) as moved_members
-       FROM khairat_members`
+        (SELECT COUNT(*) FROM khairat_ahli) as total_ahli,
+        (SELECT COUNT(*) FROM khairat_ahli WHERE status = 'approved') as approved_ahli,
+        (SELECT COUNT(*) FROM khairat_ahli WHERE status = 'pending') as pending_ahli,
+        (SELECT COUNT(*) FROM khairat_tanggungan) as total_tanggungan`
     );
 
     return NextResponse.json({
       uploads,
-      stats: stats[0]
+      stats: {
+        total_members: stats[0].total_ahli || 0,
+        active_members: stats[0].approved_ahli || 0,
+        pending_members: stats[0].pending_ahli || 0,
+        total_tanggungan: stats[0].total_tanggungan || 0
+      }
     });
 
   } catch (error) {
@@ -369,14 +325,14 @@ export async function DELETE(request: NextRequest) {
     try {
       await connection.beginTransaction();
 
-      // Delete all payments first (foreign key constraint)
-      const [paymentsResult] = await connection.query<ResultSetHeader>(
-        'DELETE FROM khairat_payments'
+      // Delete all tanggungan first (foreign key constraint)
+      const [tanggunganResult] = await connection.query<ResultSetHeader>(
+        'DELETE FROM khairat_tanggungan'
       );
 
-      // Delete all members
-      const [membersResult] = await connection.query<ResultSetHeader>(
-        'DELETE FROM khairat_members'
+      // Delete all ahli
+      const [ahliResult] = await connection.query<ResultSetHeader>(
+        'DELETE FROM khairat_ahli'
       );
 
       // Delete all upload history
@@ -390,8 +346,8 @@ export async function DELETE(request: NextRequest) {
         success: true,
         message: 'Semua data khairat telah dipadam',
         deleted: {
-          payments: paymentsResult.affectedRows,
-          members: membersResult.affectedRows,
+          tanggungan: tanggunganResult.affectedRows,
+          ahli: ahliResult.affectedRows,
           uploads: uploadsResult.affectedRows
         }
       });
