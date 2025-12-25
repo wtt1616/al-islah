@@ -403,11 +403,8 @@ export default function ManageSchedulePage() {
                   <table className="table table-bordered mb-0" style={{ fontSize: '0.7rem' }}>
                     <thead>
                       <tr className="bg-success text-white">
-                        {DAYS_MALAY.map((day, idx) => (
-                          <th key={day} className="text-center py-2" style={{
-                            width: '14.28%',
-                            backgroundColor: idx === 5 ? '#000' : undefined
-                          }}>
+                        {DAYS_MALAY.map((day) => (
+                          <th key={day} className="text-center py-2" style={{ width: '14.28%' }}>
                             {day}
                           </th>
                         ))}
