@@ -909,6 +909,34 @@ CREATE TABLE rujukan_kategori (
 
 ## Database Access
 
+### ⚠️ AMARAN KESELAMATAN DATABASE
+
+**WAJIB BACA SEBELUM JALANKAN SEBARANG QUERY DATABASE:**
+
+1. **SENTIASA sahkan database yang betul** sebelum INSERT/UPDATE/DELETE:
+   ```bash
+   # SSH ke server DULU, kemudian check .env.local
+   ssh root@117.53.155.172 -p 8288
+   cat /var/www/vhosts/isar.my/isar/.env.local | grep DB_
+   ```
+
+2. **JANGAN GUNA kredensial lama** dari context/memory sebelum ini. Database mungkin sudah migrate.
+
+3. **Database Production SEBENAR:**
+   - Host: `localhost` (dari dalam server)
+   - Database: `isar_db`
+   - User: `isar_user`
+
+4. **BUKAN database production:**
+   - `isar.myopensoft.net` - ini database LAMA, jangan guna!
+
+5. **Sebelum INSERT data testing**, SELECT dulu untuk sahkan database betul:
+   ```sql
+   SELECT COUNT(*) FROM users; -- Bandingkan dengan jumlah sebenar di UI
+   ```
+
+---
+
 ### Production Database Credentials (Surau Al-Islah Server)
 
 | Setting | Value |
