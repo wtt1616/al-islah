@@ -37,7 +37,7 @@ interface TanggunganRow extends RowDataPacket {
   nama_penuh: string;
   no_kp: string | null;
   umur: number | null;
-  pertalian: 'isteri' | 'anak' | 'anak_oku';
+  pertalian: 'isteri' | 'pasangan' | 'anak' | 'anak_oku';
   created_at: Date;
 }
 

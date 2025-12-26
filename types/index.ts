@@ -518,7 +518,7 @@ export interface SenaraiAset {
 
 export type JenisYuran = 'keahlian' | 'tahunan' | 'isteri_kedua';
 export type StatusPermohonan = 'pending' | 'approved' | 'rejected';
-export type Pertalian = 'isteri' | 'anak' | 'anak_oku';
+export type Pertalian = 'isteri' | 'pasangan' | 'anak' | 'anak_oku';
 
 export interface KhairatAhli {
   id: number;
