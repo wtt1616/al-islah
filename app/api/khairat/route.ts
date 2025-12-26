@@ -3,7 +3,6 @@ import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth';
 import pool from '@/lib/db';
 import { RowDataPacket } from 'mysql2';
-import { decrypt } from '@/lib/encryption';
 
 export const dynamic = 'force-dynamic';
 
@@ -53,7 +52,7 @@ export async function GET(request: NextRequest) {
         (SELECT COUNT(*) FROM khairat_tanggungan WHERE khairat_ahli_id = k.id) as tanggungan_count
       FROM khairat_ahli k
       LEFT JOIN users u ON k.approved_by = u.id
-      WHERE k.linked_member_id IS NULL
+      WHERE 1=1
     `;
     const params: any[] = [];
 
@@ -74,8 +73,8 @@ export async function GET(request: NextRequest) {
 
     const [rows] = await pool.query<KhairatAhliRow[]>(query, params);
 
-    // Get total count (exclude linked records - those are auto-created for payments)
-    let countQuery = 'SELECT COUNT(*) as total FROM khairat_ahli WHERE linked_member_id IS NULL';
+    // Get total count
+    let countQuery = 'SELECT COUNT(*) as total FROM khairat_ahli WHERE 1=1';
     const countParams: any[] = [];
 
     if (status && status !== 'semua') {
@@ -93,13 +92,12 @@ export async function GET(request: NextRequest) {
     const [countResult] = await pool.query<RowDataPacket[]>(countQuery, countParams);
     const total = countResult[0].total;
 
-    // Get status counts (exclude linked records)
+    // Get status counts
     const [statusCounts] = await pool.query<RowDataPacket[]>(`
       SELECT
         status,
         COUNT(*) as count
       FROM khairat_ahli
-      WHERE linked_member_id IS NULL
       GROUP BY status
     `);
 
@@ -115,14 +113,8 @@ export async function GET(request: NextRequest) {
       counts.semua += row.count;
     });
 
-    // Decrypt no_kp for each record before returning
-    const decryptedRows = rows.map(row => ({
-      ...row,
-      no_kp: decrypt(row.no_kp)
-    }));
-
     return NextResponse.json({
-      data: decryptedRows,
+      data: rows,
       pagination: {
         page,
         limit,
