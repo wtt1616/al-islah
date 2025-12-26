@@ -5,7 +5,6 @@ import pool from '@/lib/db';
 import { RowDataPacket, ResultSetHeader } from 'mysql2';
 import { sendKhairatApprovalWhatsApp, sendKhairatRejectionWhatsApp, isWhatsAppConfigured } from '@/lib/whatsapp';
 import { sendKhairatApprovalEmail, sendKhairatRejectionEmail, isEmailConfigured } from '@/lib/email';
-import { decrypt } from '@/lib/encryption';
 
 export const dynamic = 'force-dynamic';
 
@@ -75,21 +74,9 @@ export async function GET(
       [id]
     );
 
-    // Decrypt sensitive data before returning
-    const decryptedData = {
-      ...rows[0],
-      no_kp: decrypt(rows[0].no_kp)
-    };
-
-    // Decrypt tanggungan no_kp as well
-    const decryptedTanggungan = tanggungan.map(t => ({
-      ...t,
-      no_kp: t.no_kp ? decrypt(t.no_kp) : null
-    }));
-
     return NextResponse.json({
-      ...decryptedData,
-      tanggungan: decryptedTanggungan
+      ...rows[0],
+      tanggungan
     });
   } catch (error) {
     console.error('Error fetching khairat application:', error);
@@ -97,7 +84,7 @@ export async function GET(
   }
 }
 
-// PUT - Approve or reject khairat application
+// PUT - Approve, reject, or update khairat application
 export async function PUT(
   request: NextRequest,
   { params }: { params: Promise<{ id: string }> }
@@ -113,8 +100,13 @@ export async function PUT(
     const body = await request.json();
     const { action, reject_reason } = body;
 
-    if (!action || !['approve', 'reject'].includes(action)) {
+    if (!action || !['approve', 'reject', 'update'].includes(action)) {
       return NextResponse.json({ error: 'Tindakan tidak sah' }, { status: 400 });
+    }
+
+    // Handle update action
+    if (action === 'update') {
+      return await handleUpdate(id, body, session);
     }
 
     // Get current application
@@ -232,6 +224,94 @@ export async function PUT(
   } catch (error) {
     console.error('Error processing khairat application:', error);
     return NextResponse.json({ error: 'Gagal memproses permohonan' }, { status: 500 });
+  }
+}
+
+// Helper function to handle update action
+async function handleUpdate(id: string, body: any, session: any) {
+  const connection = await pool.getConnection();
+
+  try {
+    await connection.beginTransaction();
+
+    const { nama, no_kp, umur, alamat, no_hp, tanggungan } = body;
+
+    // Validate required fields
+    if (!nama || !no_kp || !alamat || !no_hp) {
+      return NextResponse.json({ error: 'Sila lengkapkan semua maklumat wajib' }, { status: 400 });
+    }
+
+    // Clean IC number
+    const cleanNoKp = no_kp.replace(/[-\s]/g, '').trim();
+
+    // Update main record
+    await connection.query<ResultSetHeader>(
+      `UPDATE khairat_ahli SET
+        nama = ?, no_kp = ?, umur = ?, alamat = ?, no_hp = ?, updated_at = NOW()
+       WHERE id = ?`,
+      [nama.trim(), cleanNoKp, umur || null, alamat.trim(), no_hp.replace(/[-\s]/g, '').trim(), id]
+    );
+
+    // Handle tanggungan updates
+    if (tanggungan && Array.isArray(tanggungan)) {
+      // Get existing tanggungan IDs
+      const [existingTanggungan] = await connection.query<RowDataPacket[]>(
+        'SELECT id FROM khairat_tanggungan WHERE khairat_ahli_id = ?',
+        [id]
+      );
+      const existingIds = existingTanggungan.map((t: any) => t.id);
+
+      // Process each tanggungan
+      const processedIds: number[] = [];
+
+      for (const t of tanggungan) {
+        if (!t.nama_penuh || !t.pertalian) continue;
+
+        const tanggunganNoKp = t.no_kp?.trim() ? t.no_kp.replace(/[-\s]/g, '').trim() : null;
+
+        if (t.id && existingIds.includes(t.id)) {
+          // Update existing tanggungan
+          await connection.query(
+            `UPDATE khairat_tanggungan SET
+              nama_penuh = ?, no_kp = ?, umur = ?, pertalian = ?
+             WHERE id = ? AND khairat_ahli_id = ?`,
+            [t.nama_penuh.trim(), tanggunganNoKp, t.umur || null, t.pertalian, t.id, id]
+          );
+          processedIds.push(t.id);
+        } else {
+          // Insert new tanggungan
+          const [result] = await connection.query<ResultSetHeader>(
+            `INSERT INTO khairat_tanggungan (khairat_ahli_id, nama_penuh, no_kp, umur, pertalian)
+             VALUES (?, ?, ?, ?, ?)`,
+            [id, t.nama_penuh.trim(), tanggunganNoKp, t.umur || null, t.pertalian]
+          );
+          processedIds.push(result.insertId);
+        }
+      }
+
+      // Delete tanggungan that were removed
+      const idsToDelete = existingIds.filter((existingId: number) => !processedIds.includes(existingId));
+      if (idsToDelete.length > 0) {
+        await connection.query(
+          `DELETE FROM khairat_tanggungan WHERE id IN (?) AND khairat_ahli_id = ?`,
+          [idsToDelete, id]
+        );
+      }
+    }
+
+    await connection.commit();
+
+    return NextResponse.json({
+      success: true,
+      message: 'Rekod khairat telah dikemaskini'
+    });
+
+  } catch (error) {
+    await connection.rollback();
+    console.error('Error updating khairat record:', error);
+    return NextResponse.json({ error: 'Gagal mengemaskini rekod' }, { status: 500 });
+  } finally {
+    connection.release();
   }
 }
 

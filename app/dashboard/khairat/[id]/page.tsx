@@ -9,6 +9,14 @@ interface KhairatAhliDetail extends KhairatAhli {
   tanggungan: KhairatTanggungan[];
 }
 
+interface EditableTanggungan {
+  id?: number;
+  nama_penuh: string;
+  no_kp: string;
+  umur: string;
+  pertalian: string;
+}
+
 export default function KhairatDetailPage({ params }: { params: { id: string } }) {
   const { data: session, status: sessionStatus } = useSession();
   const router = useRouter();
@@ -17,6 +25,18 @@ export default function KhairatDetailPage({ params }: { params: { id: string } }
   const [processing, setProcessing] = useState(false);
   const [showRejectModal, setShowRejectModal] = useState(false);
   const [rejectReason, setRejectReason] = useState('');
+
+  // Edit mode states
+  const [isEditing, setIsEditing] = useState(false);
+  const [editForm, setEditForm] = useState({
+    nama: '',
+    no_kp: '',
+    umur: '',
+    alamat: '',
+    no_hp: ''
+  });
+  const [editTanggungan, setEditTanggungan] = useState<EditableTanggungan[]>([]);
+  const [saving, setSaving] = useState(false);
 
   useEffect(() => {
     if (sessionStatus === 'unauthenticated') {
@@ -45,6 +65,26 @@ export default function KhairatDetailPage({ params }: { params: { id: string } }
 
       const data = await response.json();
       setApplication(data);
+
+      // Initialize edit form
+      setEditForm({
+        nama: data.nama || '',
+        no_kp: data.no_kp || '',
+        umur: data.umur?.toString() || '',
+        alamat: data.alamat || '',
+        no_hp: data.no_hp || ''
+      });
+
+      // Initialize edit tanggungan
+      setEditTanggungan(
+        (data.tanggungan || []).map((t: KhairatTanggungan) => ({
+          id: t.id,
+          nama_penuh: t.nama_penuh || '',
+          no_kp: t.no_kp || '',
+          umur: t.umur?.toString() || '',
+          pertalian: t.pertalian || 'anak'
+        }))
+      );
     } catch (error) {
       console.error('Error fetching application:', error);
       alert('Gagal memuatkan permohonan');
@@ -109,6 +149,89 @@ export default function KhairatDetailPage({ params }: { params: { id: string } }
     }
   };
 
+  const handleSaveEdit = async () => {
+    if (!editForm.nama || !editForm.no_kp || !editForm.alamat || !editForm.no_hp) {
+      alert('Sila lengkapkan semua maklumat wajib');
+      return;
+    }
+
+    setSaving(true);
+    try {
+      const response = await fetch(`/api/khairat/${params.id}`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          action: 'update',
+          nama: editForm.nama,
+          no_kp: editForm.no_kp,
+          umur: editForm.umur ? parseInt(editForm.umur) : null,
+          alamat: editForm.alamat,
+          no_hp: editForm.no_hp,
+          tanggungan: editTanggungan.map(t => ({
+            id: t.id,
+            nama_penuh: t.nama_penuh,
+            no_kp: t.no_kp,
+            umur: t.umur ? parseInt(t.umur) : null,
+            pertalian: t.pertalian
+          }))
+        })
+      });
+
+      const data = await response.json();
+
+      if (!response.ok) {
+        throw new Error(data.error || 'Gagal mengemaskini rekod');
+      }
+
+      alert('Rekod telah dikemaskini');
+      setIsEditing(false);
+      fetchApplication(); // Refresh data
+    } catch (error: any) {
+      alert(error.message);
+    } finally {
+      setSaving(false);
+    }
+  };
+
+  const handleCancelEdit = () => {
+    // Reset form to original values
+    if (application) {
+      setEditForm({
+        nama: application.nama || '',
+        no_kp: application.no_kp || '',
+        umur: application.umur?.toString() || '',
+        alamat: application.alamat || '',
+        no_hp: application.no_hp || ''
+      });
+      setEditTanggungan(
+        (application.tanggungan || []).map((t: KhairatTanggungan) => ({
+          id: t.id,
+          nama_penuh: t.nama_penuh || '',
+          no_kp: t.no_kp || '',
+          umur: t.umur?.toString() || '',
+          pertalian: t.pertalian || 'anak'
+        }))
+      );
+    }
+    setIsEditing(false);
+  };
+
+  const addTanggungan = () => {
+    if (editTanggungan.length >= 7) {
+      alert('Maksimum 7 tanggungan sahaja');
+      return;
+    }
+    setEditTanggungan([...editTanggungan, { nama_penuh: '', no_kp: '', umur: '', pertalian: 'anak' }]);
+  };
+
+  const removeTanggungan = (index: number) => {
+    setEditTanggungan(editTanggungan.filter((_, i) => i !== index));
+  };
+
+  const updateTanggungan = (index: number, field: keyof EditableTanggungan, value: string) => {
+    setEditTanggungan(editTanggungan.map((t, i) => i === index ? { ...t, [field]: value } : t));
+  };
+
   const formatDate = (dateStr: string | null | undefined) => {
     if (!dateStr) return '-';
     return new Date(dateStr).toLocaleDateString('ms-MY', {
@@ -142,51 +265,29 @@ export default function KhairatDetailPage({ params }: { params: { id: string } }
     }
   };
 
-  const getJenisYuranLabel = (jenis: string) => {
-    switch (jenis) {
-      case 'keahlian':
-        return 'Yuran Keahlian (RM 50.00 - Sekali)';
-      case 'tahunan':
-        return 'Yuran Tahunan (RM 50.00 - Setiap Tahun)';
-      case 'isteri_kedua':
-        return 'Yuran Keahlian Isteri Kedua (RM 50.00)';
-      default:
-        return jenis;
-    }
-  };
-
-  const getPertalianLabel = (pertalian: string) => {
-    switch (pertalian) {
-      case 'isteri':
-        return 'Isteri';
-      case 'anak':
-        return 'Anak';
-      case 'anak_oku':
-        return 'Anak OKU';
-      default:
-        return pertalian;
-    }
-  };
-
-  // Format IC number for display: 800101125555 -> 800101-12-5555
   const formatNoKP = (noKp: string | null | undefined): string => {
     if (!noKp) return '-';
     const cleaned = noKp.replace(/[-\s]/g, '');
     if (cleaned.length === 12) {
       return `${cleaned.slice(0, 6)}-${cleaned.slice(6, 8)}-${cleaned.slice(8)}`;
     }
-    return noKp; // Return as-is if not standard format
+    return noKp;
   };
 
-  // Convert old static paths to API paths for uploaded files
+  const getPertalianLabel = (pertalian: string) => {
+    switch (pertalian) {
+      case 'pasangan': return 'Pasangan';
+      case 'isteri': return 'Isteri';
+      case 'anak': return 'Anak';
+      case 'anak_oku': return 'Anak OKU';
+      default: return pertalian;
+    }
+  };
+
   const getResitUrl = (path: string | null | undefined): string | null => {
     if (!path) return null;
-    // If already using API path, return as is
     if (path.startsWith('/api/uploads/')) return path;
-    // Convert old static path to API path
-    if (path.startsWith('/uploads/')) {
-      return `/api${path}`;
-    }
+    if (path.startsWith('/uploads/')) return `/api${path}`;
     return path;
   };
 
@@ -235,15 +336,45 @@ export default function KhairatDetailPage({ params }: { params: { id: string } }
           </div>
         </div>
         <div className="d-flex align-items-center gap-2">
+          {!isEditing && (
+            <button
+              className="btn btn-warning"
+              onClick={() => setIsEditing(true)}
+            >
+              <i className="bi bi-pencil me-2"></i>Kemaskini
+            </button>
+          )}
           <button
             className="btn btn-outline-primary"
             onClick={() => router.push(`/dashboard/khairat/${params.id}/print`)}
           >
-            <i className="bi bi-printer me-2"></i>Cetak Borang
+            <i className="bi bi-printer me-2"></i>Cetak
           </button>
           {getStatusBadge(application.status)}
         </div>
       </div>
+
+      {/* Edit Mode Banner */}
+      {isEditing && (
+        <div className="alert alert-warning d-flex justify-content-between align-items-center mb-4">
+          <div>
+            <i className="bi bi-pencil-square me-2"></i>
+            <strong>Mode Kemaskini</strong> - Anda sedang mengemaskini rekod ini
+          </div>
+          <div className="d-flex gap-2">
+            <button className="btn btn-success" onClick={handleSaveEdit} disabled={saving}>
+              {saving ? (
+                <><span className="spinner-border spinner-border-sm me-2"></span>Menyimpan...</>
+              ) : (
+                <><i className="bi bi-check-lg me-2"></i>Simpan</>
+              )}
+            </button>
+            <button className="btn btn-secondary" onClick={handleCancelEdit} disabled={saving}>
+              <i className="bi bi-x-lg me-2"></i>Batal
+            </button>
+          </div>
+        </div>
+      )}
 
       <div className="row">
         <div className="col-lg-8">
@@ -256,113 +387,134 @@ export default function KhairatDetailPage({ params }: { params: { id: string } }
               </h5>
             </div>
             <div className="card-body">
-              <div className="row">
-                <div className="col-md-6 mb-3">
-                  <label className="form-label text-muted small">Nama Penuh</label>
-                  <p className="fw-bold mb-0">{application.nama}</p>
-                </div>
-                <div className="col-md-3 mb-3">
-                  <label className="form-label text-muted small">No. K/P</label>
-                  <p className="fw-bold mb-0 font-monospace">{formatNoKP(application.no_kp)}</p>
-                </div>
-                <div className="col-md-3 mb-3">
-                  <label className="form-label text-muted small">Umur</label>
-                  <p className="fw-bold mb-0">{application.umur || '-'}</p>
-                </div>
-              </div>
-              <div className="mb-3">
-                <label className="form-label text-muted small">Alamat</label>
-                <p className="fw-bold mb-0">{application.alamat || '-'}</p>
-              </div>
-              <div className="row">
-                <div className="col-md-4 mb-3">
-                  <label className="form-label text-muted small">No. Telefon (R)</label>
-                  <p className="fw-bold mb-0">{application.no_telefon_rumah || '-'}</p>
-                </div>
-                <div className="col-md-4 mb-3">
-                  <label className="form-label text-muted small">No. H/P</label>
-                  <p className="fw-bold mb-0">
-                    <a href={`tel:${application.no_hp}`} className="text-decoration-none">
-                      {application.no_hp}
-                    </a>
-                  </p>
-                </div>
-                <div className="col-md-4 mb-3">
-                  <label className="form-label text-muted small">E-mel</label>
-                  <p className="fw-bold mb-0">
-                    {application.email ? (
-                      <a href={`mailto:${application.email}`} className="text-decoration-none">
-                        {application.email}
-                      </a>
-                    ) : '-'}
-                  </p>
-                </div>
-              </div>
+              {isEditing ? (
+                // Edit Mode
+                <>
+                  <div className="row">
+                    <div className="col-md-6 mb-3">
+                      <label className="form-label">Nama Penuh <span className="text-danger">*</span></label>
+                      <input
+                        type="text"
+                        className="form-control"
+                        value={editForm.nama}
+                        onChange={(e) => setEditForm({ ...editForm, nama: e.target.value })}
+                      />
+                    </div>
+                    <div className="col-md-3 mb-3">
+                      <label className="form-label">No. K/P <span className="text-danger">*</span></label>
+                      <input
+                        type="text"
+                        className="form-control"
+                        value={editForm.no_kp}
+                        onChange={(e) => setEditForm({ ...editForm, no_kp: e.target.value })}
+                        placeholder="000000-00-0000"
+                      />
+                    </div>
+                    <div className="col-md-3 mb-3">
+                      <label className="form-label">Umur (2026)</label>
+                      <input
+                        type="number"
+                        className="form-control"
+                        value={editForm.umur}
+                        onChange={(e) => setEditForm({ ...editForm, umur: e.target.value })}
+                        min="18"
+                        max="75"
+                      />
+                    </div>
+                  </div>
+                  <div className="mb-3">
+                    <label className="form-label">Alamat <span className="text-danger">*</span></label>
+                    <textarea
+                      className="form-control"
+                      rows={2}
+                      value={editForm.alamat}
+                      onChange={(e) => setEditForm({ ...editForm, alamat: e.target.value })}
+                    ></textarea>
+                  </div>
+                  <div className="row">
+                    <div className="col-md-6 mb-3">
+                      <label className="form-label">No. Telefon Bimbit <span className="text-danger">*</span></label>
+                      <input
+                        type="tel"
+                        className="form-control"
+                        value={editForm.no_hp}
+                        onChange={(e) => setEditForm({ ...editForm, no_hp: e.target.value })}
+                        placeholder="012-3456789"
+                      />
+                    </div>
+                  </div>
+                </>
+              ) : (
+                // View Mode
+                <>
+                  <div className="row">
+                    <div className="col-md-6 mb-3">
+                      <label className="form-label text-muted small">Nama Penuh</label>
+                      <p className="fw-bold mb-0">{application.nama}</p>
+                    </div>
+                    <div className="col-md-3 mb-3">
+                      <label className="form-label text-muted small">No. K/P</label>
+                      <p className="fw-bold mb-0 font-monospace">{formatNoKP(application.no_kp)}</p>
+                    </div>
+                    <div className="col-md-3 mb-3">
+                      <label className="form-label text-muted small">Umur</label>
+                      <p className="fw-bold mb-0">{application.umur || '-'}</p>
+                    </div>
+                  </div>
+                  <div className="mb-3">
+                    <label className="form-label text-muted small">Alamat</label>
+                    <p className="fw-bold mb-0">{application.alamat || '-'}</p>
+                  </div>
+                  <div className="row">
+                    <div className="col-md-4 mb-3">
+                      <label className="form-label text-muted small">No. H/P</label>
+                      <p className="fw-bold mb-0">
+                        <a href={`tel:${application.no_hp}`} className="text-decoration-none">
+                          {application.no_hp}
+                        </a>
+                      </p>
+                    </div>
+                  </div>
+                </>
+              )}
             </div>
           </div>
 
-          {/* Maklumat Yuran & Bayaran */}
+          {/* Maklumat Bayaran */}
           <div className="card mb-4">
             <div className="card-header bg-success text-white">
               <h5 className="mb-0">
                 <i className="bi bi-cash me-2"></i>
-                Maklumat Yuran & Bayaran
+                Maklumat Bayaran
               </h5>
             </div>
             <div className="card-body">
               <div className="row">
-                <div className="col-md-6 mb-3">
+                <div className="col-md-4 mb-3">
                   <label className="form-label text-muted small">Jenis Yuran</label>
-                  <p className="fw-bold mb-0">{getJenisYuranLabel(application.jenis_yuran)}</p>
+                  <p className="fw-bold mb-0">Keahlian</p>
                 </div>
-                <div className="col-md-3 mb-3">
+                <div className="col-md-4 mb-3">
                   <label className="form-label text-muted small">No. Resit</label>
                   <p className="fw-bold mb-0">{application.no_resit || '-'}</p>
                 </div>
-                <div className="col-md-3 mb-3">
+                <div className="col-md-4 mb-3">
                   <label className="form-label text-muted small">Amaun</label>
-                  <p className="fw-bold mb-0 text-success fs-5">RM {parseFloat(String(application.amaun_bayaran)).toFixed(2)}</p>
+                  <p className="fw-bold mb-0 text-success fs-5">RM {parseFloat(String(application.amaun_bayaran || 40)).toFixed(2)}</p>
                 </div>
               </div>
-              {/* Receipt File */}
               {application.resit_file && (
                 <div className="mt-3 pt-3 border-top">
-                  <label className="form-label text-muted small">Bukti Bayaran (Resit)</label>
-                  <div className="d-flex align-items-center gap-3">
-                    {application.resit_file.toLowerCase().endsWith('.pdf') ? (
-                      <div className="bg-danger text-white rounded d-flex align-items-center justify-content-center"
-                           style={{ width: '80px', height: '80px' }}>
-                        <i className="bi bi-file-pdf fs-2"></i>
-                      </div>
-                    ) : (
-                      <a href={getResitUrl(application.resit_file) || '#'} target="_blank" rel="noopener noreferrer">
-                        <img
-                          src={getResitUrl(application.resit_file) || ''}
-                          alt="Resit bayaran"
-                          className="rounded border"
-                          style={{ width: '80px', height: '80px', objectFit: 'cover' }}
-                        />
-                      </a>
-                    )}
-                    <div>
-                      <a
-                        href={getResitUrl(application.resit_file) || '#'}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="btn btn-outline-primary btn-sm"
-                      >
-                        <i className="bi bi-eye me-1"></i>
-                        Lihat Resit
-                      </a>
-                      <a
-                        href={getResitUrl(application.resit_file) || '#'}
-                        download
-                        className="btn btn-outline-secondary btn-sm ms-2"
-                      >
-                        <i className="bi bi-download me-1"></i>
-                        Muat Turun
-                      </a>
-                    </div>
+                  <label className="form-label text-muted small">Bukti Bayaran</label>
+                  <div>
+                    <a
+                      href={getResitUrl(application.resit_file) || '#'}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="btn btn-outline-primary btn-sm"
+                    >
+                      <i className="bi bi-eye me-1"></i>Lihat Resit
+                    </a>
                   </div>
                 </div>
               )}
@@ -371,54 +523,142 @@ export default function KhairatDetailPage({ params }: { params: { id: string } }
 
           {/* Senarai Tanggungan */}
           <div className="card mb-4">
-            <div className="card-header bg-info text-white">
+            <div className="card-header bg-info text-white d-flex justify-content-between align-items-center">
               <h5 className="mb-0">
                 <i className="bi bi-people me-2"></i>
                 Senarai Tanggungan
-                <span className="badge bg-white text-info ms-2">{application.tanggungan?.length || 0}</span>
+                <span className="badge bg-white text-info ms-2">
+                  {isEditing ? editTanggungan.length : (application.tanggungan?.length || 0)}
+                </span>
               </h5>
+              {isEditing && (
+                <button
+                  className="btn btn-light btn-sm"
+                  onClick={addTanggungan}
+                  disabled={editTanggungan.length >= 7}
+                >
+                  <i className="bi bi-plus-circle me-1"></i>Tambah
+                </button>
+              )}
             </div>
             <div className="card-body">
-              {application.tanggungan && application.tanggungan.length > 0 ? (
-                <div className="table-responsive">
-                  <table className="table table-bordered">
-                    <thead className="table-light">
-                      <tr>
-                        <th style={{ width: '5%' }}>No</th>
-                        <th>Nama Penuh</th>
-                        <th style={{ width: '20%' }}>No. K/P</th>
-                        <th style={{ width: '10%' }}>Umur</th>
-                        <th style={{ width: '15%' }}>Pertalian</th>
-                      </tr>
-                    </thead>
-                    <tbody>
-                      {application.tanggungan.map((t, index) => (
-                        <tr key={t.id}>
-                          <td className="text-center">{index + 1}</td>
-                          <td>{t.nama_penuh}</td>
-                          <td className="font-monospace">{formatNoKP(t.no_kp)}</td>
-                          <td className="text-center">{t.umur || '-'}</td>
-                          <td>
-                            <span className={`badge ${
-                              t.pertalian === 'isteri' ? 'bg-pink' :
-                              t.pertalian === 'anak_oku' ? 'bg-purple' : 'bg-secondary'
-                            }`} style={{
-                              backgroundColor: t.pertalian === 'isteri' ? '#e91e63' :
-                              t.pertalian === 'anak_oku' ? '#9c27b0' : undefined
-                            }}>
-                              {getPertalianLabel(t.pertalian)}
-                            </span>
-                          </td>
+              {isEditing ? (
+                // Edit Mode - Tanggungan
+                editTanggungan.length > 0 ? (
+                  <div className="table-responsive">
+                    <table className="table table-bordered">
+                      <thead className="table-light">
+                        <tr>
+                          <th style={{ width: '5%' }}>No</th>
+                          <th>Nama Penuh</th>
+                          <th style={{ width: '18%' }}>No. K/P</th>
+                          <th style={{ width: '10%' }}>Umur</th>
+                          <th style={{ width: '15%' }}>Pertalian</th>
+                          <th style={{ width: '8%' }}></th>
                         </tr>
-                      ))}
-                    </tbody>
-                  </table>
-                </div>
+                      </thead>
+                      <tbody>
+                        {editTanggungan.map((t, index) => (
+                          <tr key={index}>
+                            <td className="text-center align-middle">{index + 1}</td>
+                            <td>
+                              <input
+                                type="text"
+                                className="form-control form-control-sm"
+                                value={t.nama_penuh}
+                                onChange={(e) => updateTanggungan(index, 'nama_penuh', e.target.value)}
+                                placeholder="Nama penuh"
+                              />
+                            </td>
+                            <td>
+                              <input
+                                type="text"
+                                className="form-control form-control-sm"
+                                value={t.no_kp}
+                                onChange={(e) => updateTanggungan(index, 'no_kp', e.target.value)}
+                                placeholder="No. K/P"
+                              />
+                            </td>
+                            <td>
+                              <input
+                                type="number"
+                                className="form-control form-control-sm"
+                                value={t.umur}
+                                onChange={(e) => updateTanggungan(index, 'umur', e.target.value)}
+                                min="0"
+                                max="120"
+                              />
+                            </td>
+                            <td>
+                              <select
+                                className="form-select form-select-sm"
+                                value={t.pertalian}
+                                onChange={(e) => updateTanggungan(index, 'pertalian', e.target.value)}
+                              >
+                                <option value="pasangan">Pasangan</option>
+                                <option value="anak">Anak</option>
+                              </select>
+                            </td>
+                            <td className="text-center align-middle">
+                              <button
+                                type="button"
+                                className="btn btn-outline-danger btn-sm"
+                                onClick={() => removeTanggungan(index)}
+                              >
+                                <i className="bi bi-trash"></i>
+                              </button>
+                            </td>
+                          </tr>
+                        ))}
+                      </tbody>
+                    </table>
+                  </div>
+                ) : (
+                  <div className="text-center py-4 text-muted">
+                    <p className="mb-2">Tiada tanggungan</p>
+                    <button className="btn btn-outline-primary btn-sm" onClick={addTanggungan}>
+                      <i className="bi bi-plus-circle me-1"></i>Tambah Tanggungan
+                    </button>
+                  </div>
+                )
               ) : (
-                <div className="text-center py-4 text-muted">
-                  <i className="bi bi-person-x fs-1 d-block mb-2"></i>
-                  Tiada tanggungan didaftarkan
-                </div>
+                // View Mode - Tanggungan
+                application.tanggungan && application.tanggungan.length > 0 ? (
+                  <div className="table-responsive">
+                    <table className="table table-bordered">
+                      <thead className="table-light">
+                        <tr>
+                          <th style={{ width: '5%' }}>No</th>
+                          <th>Nama Penuh</th>
+                          <th style={{ width: '20%' }}>No. K/P</th>
+                          <th style={{ width: '10%' }}>Umur</th>
+                          <th style={{ width: '15%' }}>Pertalian</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        {application.tanggungan.map((t, index) => (
+                          <tr key={t.id}>
+                            <td className="text-center">{index + 1}</td>
+                            <td>{t.nama_penuh}</td>
+                            <td className="font-monospace">{formatNoKP(t.no_kp)}</td>
+                            <td className="text-center">{t.umur || '-'}</td>
+                            <td>
+                              <span className={`badge ${t.pertalian === 'pasangan' || t.pertalian === 'isteri' ? 'bg-pink' : 'bg-secondary'}`}
+                                style={{ backgroundColor: t.pertalian === 'pasangan' || t.pertalian === 'isteri' ? '#e91e63' : undefined }}>
+                                {getPertalianLabel(t.pertalian)}
+                              </span>
+                            </td>
+                          </tr>
+                        ))}
+                      </tbody>
+                    </table>
+                  </div>
+                ) : (
+                  <div className="text-center py-4 text-muted">
+                    <i className="bi bi-person-x fs-1 d-block mb-2"></i>
+                    Tiada tanggungan didaftarkan
+                  </div>
+                )
               )}
             </div>
           </div>
@@ -469,8 +709,8 @@ export default function KhairatDetailPage({ params }: { params: { id: string } }
             </div>
           </div>
 
-          {/* Action Buttons */}
-          {application.status === 'pending' && (
+          {/* Action Buttons - Only show when not editing */}
+          {application.status === 'pending' && !isEditing && (
             <div className="card">
               <div className="card-header bg-warning text-dark">
                 <h5 className="mb-0">
@@ -489,15 +729,9 @@ export default function KhairatDetailPage({ params }: { params: { id: string } }
                     disabled={processing}
                   >
                     {processing ? (
-                      <>
-                        <span className="spinner-border spinner-border-sm me-2"></span>
-                        Memproses...
-                      </>
+                      <><span className="spinner-border spinner-border-sm me-2"></span>Memproses...</>
                     ) : (
-                      <>
-                        <i className="bi bi-check-circle me-2"></i>
-                        Luluskan Permohonan
-                      </>
+                      <><i className="bi bi-check-circle me-2"></i>Luluskan Permohonan</>
                     )}
                   </button>
                   <button
@@ -505,46 +739,31 @@ export default function KhairatDetailPage({ params }: { params: { id: string } }
                     onClick={() => setShowRejectModal(true)}
                     disabled={processing}
                   >
-                    <i className="bi bi-x-circle me-2"></i>
-                    Tolak Permohonan
+                    <i className="bi bi-x-circle me-2"></i>Tolak Permohonan
                   </button>
-                </div>
-                <div className="alert alert-info mt-3 mb-0">
-                  <small>
-                    <i className="bi bi-info-circle me-1"></i>
-                    Notifikasi akan dihantar kepada pemohon melalui WhatsApp dan E-mel selepas keputusan dibuat.
-                  </small>
                 </div>
               </div>
             </div>
           )}
 
           {/* Quick Actions */}
-          <div className="card mt-4">
-            <div className="card-body">
-              <h6 className="card-title mb-3">Tindakan Pantas</h6>
-              <div className="d-grid gap-2">
-                <a
-                  href={`https://wa.me/6${application.no_hp.replace(/^0/, '')}`}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="btn btn-outline-success"
-                >
-                  <i className="bi bi-whatsapp me-2"></i>
-                  WhatsApp Pemohon
-                </a>
-                {application.email && (
+          {!isEditing && (
+            <div className="card mt-4">
+              <div className="card-body">
+                <h6 className="card-title mb-3">Tindakan Pantas</h6>
+                <div className="d-grid gap-2">
                   <a
-                    href={`mailto:${application.email}`}
-                    className="btn btn-outline-primary"
+                    href={`https://wa.me/6${application.no_hp.replace(/^0/, '')}`}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="btn btn-outline-success"
                   >
-                    <i className="bi bi-envelope me-2"></i>
-                    E-mel Pemohon
+                    <i className="bi bi-whatsapp me-2"></i>WhatsApp Pemohon
                   </a>
-                )}
+                </div>
               </div>
             </div>
-          </div>
+          )}
         </div>
       </div>
 
@@ -555,8 +774,7 @@ export default function KhairatDetailPage({ params }: { params: { id: string } }
             <div className="modal-content">
               <div className="modal-header bg-danger text-white">
                 <h5 className="modal-title">
-                  <i className="bi bi-x-circle me-2"></i>
-                  Tolak Permohonan
+                  <i className="bi bi-x-circle me-2"></i>Tolak Permohonan
                 </h5>
                 <button
                   type="button"
@@ -573,12 +791,6 @@ export default function KhairatDetailPage({ params }: { params: { id: string } }
                   value={rejectReason}
                   onChange={(e) => setRejectReason(e.target.value)}
                 ></textarea>
-                <div className="alert alert-warning mt-3 mb-0">
-                  <small>
-                    <i className="bi bi-exclamation-triangle me-1"></i>
-                    Sebab penolakan akan dihantar kepada pemohon melalui notifikasi.
-                  </small>
-                </div>
               </div>
               <div className="modal-footer">
                 <button
@@ -596,15 +808,9 @@ export default function KhairatDetailPage({ params }: { params: { id: string } }
                   disabled={processing || !rejectReason.trim()}
                 >
                   {processing ? (
-                    <>
-                      <span className="spinner-border spinner-border-sm me-2"></span>
-                      Memproses...
-                    </>
+                    <><span className="spinner-border spinner-border-sm me-2"></span>Memproses...</>
                   ) : (
-                    <>
-                      <i className="bi bi-x-circle me-2"></i>
-                      Tolak Permohonan
-                    </>
+                    <><i className="bi bi-x-circle me-2"></i>Tolak Permohonan</>
                   )}
                 </button>
               </div>
